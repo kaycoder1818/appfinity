@@ -3,8 +3,13 @@ from flask import Flask, jsonify, request
 import mysql.connector
 from datetime import datetime
 import os
+from swagger.swaggerui import setup_swagger
 
-app = Flask("appfinity")
+app = Flask(__name__)
+app = Flask(__name__, template_folder='templates', static_folder='static', static_url_path='/static')
+
+# Set up Swagger
+setup_swagger(app)
 
 # Load environment variables from .env file
 # load_dotenv()
@@ -141,7 +146,6 @@ def create_table_users():
     except mysql.connector.Error as e:
         return handle_mysql_error(e)
 
-
 @app.route('/create-table-stores', methods=['GET'])
 def create_table_stores():
     try:
@@ -227,7 +231,6 @@ def delete_datawatch_table():
     except mysql.connector.Error as e:
         return handle_mysql_error(e)
 
-
 @app.route('/delete-table-users', methods=['GET'])
 def delete_table_users():
     try:
@@ -263,7 +266,6 @@ def delete_table_users():
     except mysql.connector.Error as e:
         return handle_mysql_error(e)
 
-
 @app.route('/delete-stores-table/', methods=['GET'])
 def delete_stores_table():
     try:
@@ -298,8 +300,6 @@ def delete_stores_table():
 
     except mysql.connector.Error as e:
         return handle_mysql_error(e)
-
-
 
 ## insert the initial records for datawatch
 @app.route('/insert-data-to-datawatch', methods=['GET'])
@@ -1337,6 +1337,11 @@ def index():
         return jsonify({"message": "Welcome to the appfinity API"})
     else:
         return jsonify({"error": "MySQL database not responding, please check the database service"}), 500
+
+
+# @app.route('/', methods=['GET'])
+# def index():
+#     return jsonify({"message": "Welcome to the appfinity API"})
 
 if __name__ == '__main__':
     app.run(debug=True)
