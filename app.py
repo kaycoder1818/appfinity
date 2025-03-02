@@ -1155,53 +1155,53 @@ def update_profile():
         # Get the data from the request body
         data = request.get_json()
 
-        # Validate that either 'name' or 'full_name' is provided
-        if 'name' not in data and 'full_name' not in data:
-            return jsonify({"error": "'name' or 'full_name' is required to update a profile."}), 400
+        # Validate that 'name' is provided (we're only using 'name' for this update)
+        if 'name' not in data:
+            return jsonify({"error": "'name' is required to update a profile."}), 400
 
-        # Extract name or full_name from the data
-        name = data.get("name")
-        full_name = data.get("full_name")
+        # Extract name from the data
+        name = data["name"]
 
-        # Validate other fields that are allowed to be updated
+        # Validate other fields that are allowed to be updated (fields can be optional)
         fields_to_update = ["id_number", "plate_number", "vehicle_type", "vehicle_model"]
         for field in fields_to_update:
-            if field in data and not data[field]:
+            if field in data and data[field] == "":
                 return jsonify({"error": f"'{field}' cannot be empty."}), 400
 
         # Check if the 'profile' table exists
         cursor = get_cursor()
 
         if cursor:
-            # Prepare the condition to search by either name or full_name
-            condition = None
-            if name:
-                condition = "name = %s"
-                param = name
-            elif full_name:
-                condition = "full_name = %s"
-                param = full_name
+            # Prepare the condition to search by 'name'
+            condition = "name = %s"
+            param = (name,)
 
-            # Check if the profile exists based on the condition
-            cursor.execute(f"SELECT COUNT(*) FROM profile WHERE {condition}", (param,))
+            # Check if the profile exists based on the 'name'
+            cursor.execute("SELECT COUNT(*) FROM profile WHERE " + condition, param)
             profile_exists = cursor.fetchone()[0]
 
             if not profile_exists:
                 cursor.close()
-                return jsonify({"error": f"Profile with {condition} '{param}' does not exist."}), 404
+                return jsonify({"error": f"Profile with name '{name}' does not exist."}), 404
 
             # SQL to update the profile fields
             update_sql = """
             UPDATE profile
-            SET id_number = %s, plate_number = %s, vehicle_type = %s, vehicle_model = %s
-            WHERE {condition}
+            SET 
+                id_number = %s, 
+                plate_number = %s, 
+                vehicle_type = %s, 
+                vehicle_model = %s
+            WHERE name = %s
             """
+            
+            # Execute the update query with all the updated values
             cursor.execute(update_sql, (
                 data.get("id_number", ""),
                 data.get("plate_number", ""),
                 data.get("vehicle_type", ""),
                 data.get("vehicle_model", ""),
-                param
+                name
             ))
 
             # Commit the changes
