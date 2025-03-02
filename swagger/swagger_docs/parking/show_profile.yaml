@@ -1,0 +1,74 @@
+/profile/{name}:
+  get:
+    summary: "Retrieve Profile by Name"
+    description: "Fetches the profile details from the 'profile' table by the given 'name'. Returns profile information such as id, full name, ID number, plate number, vehicle type, vehicle model, and timestamp."
+    tags: ["Profile"]
+    parameters:
+      - name: "name"
+        in: "path"
+        required: true
+        schema:
+          type: "string"
+          description: "The name of the profile to retrieve."
+          example: "john_doe"
+    responses:
+      '200':
+        description: "Successfully retrieved profile details"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                id:
+                  type: "integer"
+                  description: "The unique ID of the profile."
+                  example: 1
+                name:
+                  type: "string"
+                  description: "The name of the profile."
+                  example: "john_doe"
+                full_name:
+                  type: "string"
+                  description: "The full name of the profile."
+                  example: "John Doe"
+                id_number:
+                  type: "string"
+                  description: "The ID number of the profile."
+                  example: "ID123456789"
+                plate_number:
+                  type: "string"
+                  description: "The vehicle plate number."
+                  example: "XYZ1234"
+                vehicle_type:
+                  type: "string"
+                  description: "The type of vehicle."
+                  example: "Car"
+                vehicle_model:
+                  type: "string"
+                  description: "The vehicle model."
+                  example: "Toyota Camry"
+                timestamp:
+                  type: "string"
+                  format: "date-time"
+                  description: "The timestamp when the profile was created or last updated."
+                  example: "2025-03-01T12:30:45Z"
+      '404':
+        description: "Profile not found if no profile matches the provided 'name'"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                error:
+                  type: "string"
+                  example: "Profile with name 'john_doe' not found."
+      '500':
+        description: "Internal Server Error if there is an issue with the database or MySQL connection"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                error:
+                  type: "string"
+                  example: "MySQL database not responding, please check the database service"

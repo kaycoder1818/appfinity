@@ -1,0 +1,80 @@
+/profile/update:
+  post:
+    summary: "Update Profile Record"
+    description: "Updates the profile record in the 'profile' table based on 'name' or 'full_name'. The fields 'id_number', 'plate_number', 'vehicle_type', and 'vehicle_model' can be updated. Either 'name' or 'full_name' must be provided to identify the profile."
+    tags: ["Profile"]
+    parameters:
+      - name: "body"
+        in: "body"
+        required: true
+        schema:
+          type: "object"
+          properties:
+            name:
+              type: "string"
+              description: "The name of the profile to update."
+              example: "testuser"
+            full_name:
+              type: "string"
+              description: "The full name of the profile to update."
+              example: "John Doe"
+            id_number:
+              type: "string"
+              description: "The new ID number for the profile."
+              example: "ID123456789"
+            plate_number:
+              type: "string"
+              description: "The new vehicle plate number."
+              example: "XYZ1234"
+            vehicle_type:
+              type: "string"
+              description: "The new vehicle type (e.g., 'Car', 'Truck')."
+              example: "Car"
+            vehicle_model:
+              type: "string"
+              description: "The new vehicle model."
+              example: "Toyota Camry"
+          required:
+            - name
+            - full_name
+    responses:
+      '200':
+        description: "Profile updated successfully"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                message:
+                  type: "string"
+                  example: "Profile updated successfully."
+      '400':
+        description: "Bad Request if 'name' or 'full_name' is not provided or any field is empty"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                error:
+                  type: "string"
+                  example: "'name' or 'full_name' is required to update a profile, or a field cannot be empty."
+      '404':
+        description: "Profile not found if no profile matches the given 'name' or 'full_name'"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                error:
+                  type: "string"
+                  example: "Profile with name 'john_doe' does not exist."
+      '500':
+        description: "Internal Server Error if there is an issue with the database or MySQL connection"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                error:
+                  type: "string"
+                  example: "MySQL database not responding, please check the database service"

@@ -817,6 +817,14 @@ def add_user():
         if "name" not in data or "password_hash" not in data:
             return jsonify({"error": "Both 'name' and 'password_hash' are required fields."}), 400
         
+        # Add validation for the 'role' field (if required)
+        role = data.get("role", "")  # Default to empty string if not provided
+
+        # Validate role if necessary, for example, checking if it’s one of a list of valid roles
+        valid_roles = ["admin", "user", "guest"]  # Example of valid roles
+        if role and role not in valid_roles:
+            return jsonify({"error": f"Invalid role. Valid roles are {', '.join(valid_roles)}."}), 400
+        
         name = data["name"]
         password_hash = data["password_hash"]
         
@@ -835,11 +843,11 @@ def add_user():
             # Prepare the SQL query to insert a new user into the 'users' table
             insert_sql = """
             INSERT INTO users (name, password_hash, role, email, status, token, timestamp)
-            VALUES (%s, %s, '', '', '', '', NOW());
+            VALUES (%s, %s, %s, '', '', '', NOW());
             """
             
-            # Execute the insert query
-            cursor.execute(insert_sql, (name, password_hash))
+            # Execute the insert query, including the role
+            cursor.execute(insert_sql, (name, password_hash, role))
             
             # Commit the changes to the database
             db_connection.commit()
@@ -1094,7 +1102,7 @@ def get_stores():
         return handle_mysql_error(e)
 
 ## adding the new profile
-@app.route('/profile', methods=['POST'])
+@app.route('/profile/add', methods=['POST'])
 def insert_profile():
     try:
         # Get the data from the request body

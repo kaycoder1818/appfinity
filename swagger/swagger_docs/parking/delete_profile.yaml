@@ -1,0 +1,64 @@
+/profile/delete:
+  delete:
+    summary: "Delete Profile Record"
+    description: "Deletes a profile record from the 'profile' table based on 'name' or 'full_name'. Either 'name' or 'full_name' must be provided to identify the profile."
+    tags: ["Profile"]
+    parameters:
+      - name: "body"
+        in: "body"
+        required: true
+        schema:
+          type: "object"
+          properties:
+            name:
+              type: "string"
+              description: "The name of the profile to delete."
+              example: "testuser"
+            full_name:
+              type: "string"
+              description: "The full name of the profile to delete."
+              example: "John Doe"
+          required:
+            - name
+            - full_name
+    responses:
+      '200':
+        description: "Profile deleted successfully"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                message:
+                  type: "string"
+                  example: "Profile deleted successfully."
+      '400':
+        description: "Bad Request if 'name' or 'full_name' is not provided"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                error:
+                  type: "string"
+                  example: "'name' or 'full_name' is required to delete a profile."
+      '404':
+        description: "Profile not found if no profile matches the given 'name' or 'full_name'"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                error:
+                  type: "string"
+                  example: "Profile with 'name' 'testuser' does not exist."
+      '500':
+        description: "Internal Server Error if there is an issue with the database or MySQL connection"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                error:
+                  type: "string"
+                  example: "MySQL database not responding, please check the database service"

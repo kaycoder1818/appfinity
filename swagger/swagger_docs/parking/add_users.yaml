@@ -1,7 +1,7 @@
 /users/add:
   post:
     summary: "Add a New User"
-    description: "Creates a new user in the system with the provided 'name' and 'password_hash'. Checks for required fields and existing users before inserting the new user."
+    description: "Creates a new user in the system with the provided 'name', 'password_hash', and optional 'role'. Validates that both 'name' and 'password_hash' are provided, and checks if the user already exists."
     tags: ["Users"]
     parameters:
       - name: "body"
@@ -18,6 +18,10 @@
               type: "string"
               description: "The hashed password of the user."
               example: "$2b$12$VvE5xF9sT/qjCjWkHH1vE.VmTaEN8gNN8NoZNW5O0Nm2c8p2kzA0G"
+            role:
+              type: "string"
+              description: "The role of the user (optional). Valid roles are 'admin', 'user', 'guest'. Defaults to '' if not provided."
+              example: "user"
           required:
             - name
             - password_hash

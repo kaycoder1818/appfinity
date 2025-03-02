@@ -1,0 +1,68 @@
+/profile:
+  get:
+    summary: "Retrieve All Profiles"
+    description: "Fetches all profile records from the 'profile' table. Returns a list of profiles with details such as id, name, full name, ID number, plate number, vehicle type, vehicle model, and timestamp."
+    tags: ["Profile"]
+    responses:
+      '200':
+        description: "Successfully retrieved all profiles"
+        content:
+          application/json:
+            schema:
+              type: "array"
+              items:
+                type: "object"
+                properties:
+                  id:
+                    type: "integer"
+                    description: "The unique ID of the profile."
+                    example: 1
+                  name:
+                    type: "string"
+                    description: "The name of the profile."
+                    example: "testuser"
+                  full_name:
+                    type: "string"
+                    description: "The full name of the profile."
+                    example: "John Doe"
+                  id_number:
+                    type: "string"
+                    description: "The ID number of the profile."
+                    example: "ID123456789"
+                  plate_number:
+                    type: "string"
+                    description: "The vehicle plate number."
+                    example: "XYZ1234"
+                  vehicle_type:
+                    type: "string"
+                    description: "The type of vehicle."
+                    example: "Car"
+                  vehicle_model:
+                    type: "string"
+                    description: "The vehicle model."
+                    example: "Toyota Camry"
+                  timestamp:
+                    type: "string"
+                    format: "date-time"
+                    description: "The timestamp when the profile was created or last updated."
+                    example: "2025-03-01T12:30:45Z"
+      '404':
+        description: "No profiles found"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                message:
+                  type: "string"
+                  example: "No profiles found."
+      '500':
+        description: "Internal Server Error if there is an issue with the database or MySQL connection"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                error:
+                  type: "string"
+                  example: "MySQL database not responding, please check the database service"
