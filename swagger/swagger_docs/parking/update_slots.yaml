@@ -1,0 +1,68 @@
+/stores/update-slot:
+  post:
+    summary: "Update Store Slot Value"
+    description: "Updates the value of a specific 'slot' column in the 'stores' table by using a unique store ID and slot name. Slot names are limited to 'slot1' through 'slot16'."
+    tags: ["Stores"]
+    parameters:
+      - name: "unique_id"
+        in: "query"
+        required: true
+        schema:
+          type: "string"
+          description: "The unique identifier(12345 is the the default) of the store to update."
+          example: "12345"
+      - name: "slot"
+        in: "query"
+        required: true
+        schema:
+          type: "string"
+          description: "The name of the slot to update (e.g., 'slot1' to 'slot16')."
+          example: "slot1"
+      - name: "new_value"
+        in: "query"
+        required: true
+        schema:
+          type: "string"
+          description: "The new value to set for the specified slot."
+          example: "available"
+    responses:
+      '200':
+        description: "Successfully updated the slot value"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                message:
+                  type: "string"
+                  example: "Successfully updated slot5 for store with unique_id 'store_12345'."
+      '400':
+        description: "Bad Request if required fields are missing or the slot is invalid"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                error:
+                  type: "string"
+                  example: "'unique_id', 'slot', and 'new_value' are required in the request body."
+      '404':
+        description: "Store not found"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                error:
+                  type: "string"
+                  example: "Store with unique_id 'store_12345' does not exist."
+      '500':
+        description: "Internal Server Error if there is an issue with the database or MySQL connection"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                error:
+                  type: "string"
+                  example: "MySQL database not responding, please check the database service"

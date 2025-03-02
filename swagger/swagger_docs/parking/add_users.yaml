@@ -1,0 +1,51 @@
+/users/add:
+  post:
+    summary: "Add a New User"
+    description: "Creates a new user in the system with the provided 'name' and 'password_hash'. Checks for required fields and existing users before inserting the new user."
+    tags: ["Users"]
+    parameters:
+      - name: "name"
+        in: "query"
+        required: true
+        schema:
+          type: "string"
+          description: "The name of the user."
+          example: "testuser"
+      - name: "password_hash"
+        in: "query"
+        required: true
+        schema:
+          type: "string"
+          description: "The hashed password of the user."
+          example: "$2b$12$VvE5xF9sT/qjCjWkHH1vE.VmTaEN8gNN8NoZNW5O0Nm2c8p2kzA0G"
+    responses:
+      '201':
+        description: "User successfully created"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                message:
+                  type: "string"
+                  example: "User added successfully."
+      '400':
+        description: "Bad Request if required fields are missing or the user already exists"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                error:
+                  type: "string"
+                  example: "Both 'name' and 'password_hash' are required fields."
+      '500':
+        description: "Internal Server Error if there is an issue with the database or MySQL connection"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                error:
+                  type: "string"
+                  example: "MySQL database not responding, please check the database service"

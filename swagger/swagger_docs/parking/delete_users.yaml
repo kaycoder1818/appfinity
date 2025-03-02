@@ -1,0 +1,54 @@
+/users/delete:
+  delete:
+    summary: "Delete a User by Name"
+    description: "Deletes a user from the system by their 'name'. Requires 'name' as the input parameter."
+    tags: ["Users"]
+    parameters:
+      - name: "name"
+        in: "query"
+        required: true
+        schema:
+          type: "string"
+          description: "The name of the user to delete."
+          example: "john_doe"
+    responses:
+      '200':
+        description: "User deleted successfully"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                message:
+                  type: "string"
+                  example: "User 'john_doe' deleted successfully."
+      '400':
+        description: "Bad Request if 'name' is missing"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                error:
+                  type: "string"
+                  example: "'name' is a required field."
+      '404':
+        description: "User not found"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                error:
+                  type: "string"
+                  example: "User not found."
+      '500':
+        description: "Internal Server Error if there is an issue with the database or MySQL connection"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                error:
+                  type: "string"
+                  example: "MySQL database not responding, please check the database service"

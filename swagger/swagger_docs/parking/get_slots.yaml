@@ -1,0 +1,121 @@
+/stores:
+  get:
+    summary: "Get All Store Records"
+    description: "Retrieves all the records from the 'stores' table, returning details of each store, including the status of all slots."
+    tags: ["Stores"]
+    responses:
+      '200':
+        description: "Successfully retrieved all store records"
+        content:
+          application/json:
+            schema:
+              type: "array"
+              items:
+                type: "object"
+                properties:
+                  unique_id:
+                    type: "string"
+                    description: "The unique identifier for the store."
+                    example: "12345"
+                  slot1:
+                    type: "string"
+                    description: "Status of slot1"
+                    example: "available"
+                  slot2:
+                    type: "string"
+                    description: "Status of slot2"
+                    example: "available"
+                  slot3:
+                    type: "string"
+                    description: "Status of slot3"
+                    example: "available"
+                  slot4:
+                    type: "string"
+                    description: "Status of slot4"
+                    example: "available"
+                  slot5:
+                    type: "string"
+                    description: "Status of slot5"
+                    example: "available"
+                  slot6:
+                    type: "string"
+                    description: "Status of slot6"
+                    example: "available"
+                  slot7:
+                    type: "string"
+                    description: "Status of slot7"
+                    example: "available"
+                  slot8:
+                    type: "string"
+                    description: "Status of slot8"
+                    example: "available"
+                  slot9:
+                    type: "string"
+                    description: "Status of slot9"
+                    example: "available"
+                  slot10:
+                    type: "string"
+                    description: "Status of slot10"
+                    example: "available"
+                  slot11:
+                    type: "string"
+                    description: "Status of slot11"
+                    example: "available"
+                  slot12:
+                    type: "string"
+                    description: "Status of slot12"
+                    example: "available"
+                  slot13:
+                    type: "string"
+                    description: "Status of slot13"
+                    example: "available"
+                  slot14:
+                    type: "string"
+                    description: "Status of slot14"
+                    example: "available"
+                  slot15:
+                    type: "string"
+                    description: "Status of slot15"
+                    example: "available"
+                  slot16:
+                    type: "string"
+                    description: "Status of slot16"
+                    example: "available"
+            example:
+              - unique_id: "12345"
+                slot1: "available"
+                slot2: "available"
+                slot3: "available"
+                slot4: "available"
+                slot5: "available"
+                slot6: "available"
+                slot7: "available"
+                slot8: "available"
+                slot9: "available"
+                slot10: "available"
+                slot11: "available"
+                slot12: "available"
+                slot13: "available"
+                slot14: "available"
+                slot15: "available"
+                slot16: "available"
+      '404':
+        description: "No records found in the stores table"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                message:
+                  type: "string"
+                  example: "No records found in the stores table."
+      '500':
+        description: "Internal Server Error if there is an issue with the database or MySQL connection"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                error:
+                  type: "string"
+                  example: "MySQL database not responding, please check the database service"

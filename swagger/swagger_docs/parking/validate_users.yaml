@@ -1,0 +1,64 @@
+/users/validate:
+  post:
+    summary: "Validate User Credentials"
+    description: "Validates the 'name' and 'password_hash' of a user. If the user exists, it checks if the provided password matches the stored password hash."
+    tags: ["Users"]
+    parameters:
+      - name: "name"
+        in: "query"
+        required: true
+        schema:
+          type: "string"
+          description: "The name of the user to validate."
+          example: "testuser"
+      - name: "password_hash"
+        in: "query"
+        required: true
+        schema:
+          type: "string"
+          description: "The hashed password to validate."
+          example: "$2b$12$VvE5xF9sT/qjCjWkHH1vE.VmTaEN8gNN8NoZNW5O0Nm2c8p2kzA0G"
+    responses:
+      '200':
+        description: "Successfully validated user, password matches"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                message:
+                  type: "string"
+                  example: "Match"
+                role:
+                  type: "string"
+                  example: "admin"
+      '400':
+        description: "Bad Request if password does not match"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                error:
+                  type: "string"
+                  example: "Password does not match."
+      '404':
+        description: "User not found"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                error:
+                  type: "string"
+                  example: "User not found."
+      '500':
+        description: "Internal Server Error if there is an issue with the database or MySQL connection"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                error:
+                  type: "string"
+                  example: "MySQL database not responding, please check the database service"

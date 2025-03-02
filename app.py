@@ -803,7 +803,7 @@ def get_users():
         return handle_mysql_error(e)
 
 ## adding the new user
-@app.route('/users', methods=['POST'])
+@app.route('/users/add', methods=['POST'])
 def add_user():
     try:
         # Check if MySQL is available
