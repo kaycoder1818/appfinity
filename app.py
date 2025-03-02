@@ -142,7 +142,7 @@ def create_table_users():
         return handle_mysql_error(e)
 
 
-@app.route('/create-table-stores/', methods=['GET'])
+@app.route('/create-table-stores', methods=['GET'])
 def create_table_stores():
     try:
         # Check if MySQL is available
@@ -237,6 +237,39 @@ def delete_table_users():
         return handle_mysql_error(e)
 
 
+
+## insert the initial records for datawatch
+@app.route('/insert-data-to-datawatch', methods=['GET'])
+def insert_data():
+    try:
+        if not is_mysql_available():
+            return jsonify({"error": "MySQL database not responding, please check the database service"}), 500
+        
+        cursor = get_cursor()
+        if cursor:
+            for field in field_db:
+                name = field[0]
+                value = field[1]
+                
+                # Check if the field already exists
+                sql_select = "SELECT * FROM datawatch WHERE field = %s"
+                cursor.execute(sql_select, (name,))
+                existing_field = cursor.fetchone()
+                
+                if not existing_field:
+                    # Insert new field if it doesn't exist
+                    sql_insert = "INSERT INTO datawatch (field, value) VALUES (%s, %s)"
+                    cursor.execute(sql_insert, (name, value))
+            
+            db_connection.commit()
+            cursor.close()
+            return jsonify({"message": "Data inserted successfully"}), 200
+        else:
+            return jsonify({"error": "Database connection not available"}), 500
+    except mysql.connector.Error as e:
+        return handle_mysql_error(e)
+
+
 # List of users to insert 
 users_db = [
     {
@@ -296,36 +329,6 @@ def insert_users():
     except mysql.connector.Error as e:
         return handle_mysql_error(e)
 
-## insert the initial records for datawatch
-@app.route('/insert-data-to-datawatch', methods=['GET'])
-def insert_data():
-    try:
-        if not is_mysql_available():
-            return jsonify({"error": "MySQL database not responding, please check the database service"}), 500
-        
-        cursor = get_cursor()
-        if cursor:
-            for field in field_db:
-                name = field[0]
-                value = field[1]
-                
-                # Check if the field already exists
-                sql_select = "SELECT * FROM datawatch WHERE field = %s"
-                cursor.execute(sql_select, (name,))
-                existing_field = cursor.fetchone()
-                
-                if not existing_field:
-                    # Insert new field if it doesn't exist
-                    sql_insert = "INSERT INTO datawatch (field, value) VALUES (%s, %s)"
-                    cursor.execute(sql_insert, (name, value))
-            
-            db_connection.commit()
-            cursor.close()
-            return jsonify({"message": "Data inserted successfully"}), 200
-        else:
-            return jsonify({"error": "Database connection not available"}), 500
-    except mysql.connector.Error as e:
-        return handle_mysql_error(e)
 
 # Hardcoded stores data
 stores_db = [
