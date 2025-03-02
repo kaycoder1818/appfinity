@@ -202,8 +202,8 @@ def create_table_stores():
 
 
 
-@app.route('/delete-field-table/', methods=['GET'])
-def delete_field_table():
+@app.route('/delete-table-datawatch/', methods=['GET'])
+def delete_datawatch_table():
     try:
         # Check if MySQL is available
         if not is_mysql_available():
@@ -213,23 +213,23 @@ def delete_field_table():
         cursor = get_cursor()
 
         if cursor:
-            # Check if the 'field' table exists
-            cursor.execute("SELECT COUNT(*) FROM information_schema.tables WHERE table_name = 'field'")
+            # Check if the 'datawatch' table exists
+            cursor.execute("SELECT COUNT(*) FROM information_schema.tables WHERE table_name = 'datawatch'")
             table_exists = cursor.fetchone()[0]
 
             if not table_exists:
                 cursor.close()
-                return jsonify({"error": "Table 'field' does not exist."}), 404
+                return jsonify({"error": "Table 'datawatch' does not exist."}), 404
 
-            # SQL to drop the 'field' table
-            drop_table_sql = "DROP TABLE field"
+            # SQL to drop the 'datawatch' table
+            drop_table_sql = "DROP TABLE datawatch"
             cursor.execute(drop_table_sql)
 
             # Commit the changes
             db_connection.commit()
             cursor.close()
 
-            return jsonify({"message": "Table 'field' deleted successfully."}), 200
+            return jsonify({"message": "Table 'datawatch' deleted successfully."}), 200
 
         else:
             return jsonify({"error": "Database connection not available"}), 500
