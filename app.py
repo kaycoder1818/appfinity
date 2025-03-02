@@ -157,7 +157,7 @@ def create_table_stores():
             create_table_sql = """
             CREATE TABLE IF NOT EXISTS stores (
                 id INT AUTO_INCREMENT PRIMARY KEY,
-                unique_id TEXT UNIQUE,
+                unique_id TEXT,
                 slot1 TEXT,
                 slot2 TEXT,
                 slot3 TEXT,
