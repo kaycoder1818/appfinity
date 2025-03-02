@@ -1173,39 +1173,40 @@ def update_profile():
         cursor = get_cursor()
 
         if cursor:
-            # Prepare the condition to search by 'name'
-            condition = "name = %s"
-            param = (name,)
-
-            # Check if the profile exists based on the 'name'
-            cursor.execute("SELECT COUNT(*) FROM profile WHERE " + condition, param)
-            profile_exists = cursor.fetchone()[0]
-
-            if not profile_exists:
-                cursor.close()
-                return jsonify({"error": f"Profile with name '{name}' does not exist."}), 404
-
-            # SQL to update the profile fields, including full_name
+            # SQL to update the profile fields
             update_sql = """
             UPDATE profile
             SET 
                 id_number = %s, 
                 plate_number = %s, 
                 vehicle_type = %s, 
-                vehicle_model = %s,
-                full_name = %s
-            WHERE name = %s
+                vehicle_model = %s
             """
             
-            # Execute the update query with all the updated values
-            cursor.execute(update_sql, (
+            # If full_name is provided, append it to the SQL and add it to the parameters
+            if full_name:
+                update_sql += ", full_name = %s"
+            
+            # Add WHERE clause to match the profile by name
+            update_sql += " WHERE name = %s"
+
+            # Prepare parameters for the query
+            params = (
                 data.get("id_number", ""),
                 data.get("plate_number", ""),
                 data.get("vehicle_type", ""),
                 data.get("vehicle_model", ""),
-                full_name if full_name else "",  # Only update full_name if provided
-                name
-            ))
+            )
+
+            # Include full_name in the parameters if it exists
+            if full_name:
+                params += (full_name,)
+
+            # Add the name at the end of the parameters (for WHERE condition)
+            params += (name,)
+
+            # Execute the update query with all the updated values
+            cursor.execute(update_sql, params)
 
             # Commit the changes
             db_connection.commit()
