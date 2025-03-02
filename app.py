@@ -201,7 +201,44 @@ def create_table_stores():
         return handle_mysql_error(e)
 
 
-@app.route('/delete-table-users', methods=['DELETE'])
+
+@app.route('/delete-field-table/', methods=['GET'])
+def delete_field_table():
+    try:
+        # Check if MySQL is available
+        if not is_mysql_available():
+            return jsonify({"error": "MySQL database not responding, please check the database service"}), 500
+
+        # Get a database cursor
+        cursor = get_cursor()
+
+        if cursor:
+            # Check if the 'field' table exists
+            cursor.execute("SELECT COUNT(*) FROM information_schema.tables WHERE table_name = 'field'")
+            table_exists = cursor.fetchone()[0]
+
+            if not table_exists:
+                cursor.close()
+                return jsonify({"error": "Table 'field' does not exist."}), 404
+
+            # SQL to drop the 'field' table
+            drop_table_sql = "DROP TABLE field"
+            cursor.execute(drop_table_sql)
+
+            # Commit the changes
+            db_connection.commit()
+            cursor.close()
+
+            return jsonify({"message": "Table 'field' deleted successfully."}), 200
+
+        else:
+            return jsonify({"error": "Database connection not available"}), 500
+
+    except mysql.connector.Error as e:
+        return handle_mysql_error(e)
+
+
+@app.route('/delete-table-users', methods=['GET'])
 def delete_table_users():
     try:
         # Check if MySQL is available
@@ -233,6 +270,42 @@ def delete_table_users():
         else:
             return jsonify({"error": "Database connection not available"}), 500
     
+    except mysql.connector.Error as e:
+        return handle_mysql_error(e)
+
+
+@app.route('/delete-stores-table/', methods=['GET'])
+def delete_stores_table():
+    try:
+        # Check if MySQL is available
+        if not is_mysql_available():
+            return jsonify({"error": "MySQL database not responding, please check the database service"}), 500
+
+        # Get a database cursor
+        cursor = get_cursor()
+
+        if cursor:
+            # Check if the 'stores' table exists
+            cursor.execute("SELECT COUNT(*) FROM information_schema.tables WHERE table_name = 'stores'")
+            table_exists = cursor.fetchone()[0]
+
+            if not table_exists:
+                cursor.close()
+                return jsonify({"error": "Table 'stores' does not exist."}), 404
+
+            # SQL to drop the 'stores' table
+            drop_table_sql = "DROP TABLE stores"
+            cursor.execute(drop_table_sql)
+
+            # Commit the changes
+            db_connection.commit()
+            cursor.close()
+
+            return jsonify({"message": "Table 'stores' deleted successfully."}), 200
+
+        else:
+            return jsonify({"error": "Database connection not available"}), 500
+
     except mysql.connector.Error as e:
         return handle_mysql_error(e)
 
