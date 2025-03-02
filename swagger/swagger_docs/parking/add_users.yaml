@@ -4,20 +4,23 @@
     description: "Creates a new user in the system with the provided 'name' and 'password_hash'. Checks for required fields and existing users before inserting the new user."
     tags: ["Users"]
     parameters:
-      - name: "name"
-        in: "query"
+      - name: "body"
+        in: "body"
         required: true
         schema:
-          type: "string"
-          description: "The name of the user."
-          example: "testuser"
-      - name: "password_hash"
-        in: "query"
-        required: true
-        schema:
-          type: "string"
-          description: "The hashed password of the user."
-          example: "$2b$12$VvE5xF9sT/qjCjWkHH1vE.VmTaEN8gNN8NoZNW5O0Nm2c8p2kzA0G"
+          type: "object"
+          properties:
+            name:
+              type: "string"
+              description: "The name of the user."
+              example: "testuser"
+            password_hash:
+              type: "string"
+              description: "The hashed password of the user."
+              example: "$2b$12$VvE5xF9sT/qjCjWkHH1vE.VmTaEN8gNN8NoZNW5O0Nm2c8p2kzA0G"
+          required:
+            - name
+            - password_hash
     responses:
       '201':
         description: "User successfully created"

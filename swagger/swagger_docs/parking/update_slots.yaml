@@ -4,27 +4,28 @@
     description: "Updates the value of a specific 'slot' column in the 'stores' table by using a unique store ID and slot name. Slot names are limited to 'slot1' through 'slot16'."
     tags: ["Stores"]
     parameters:
-      - name: "unique_id"
-        in: "query"
+      - name: "body"
+        in: "body"
         required: true
         schema:
-          type: "string"
-          description: "The unique identifier(12345 is the the default) of the store to update."
-          example: "12345"
-      - name: "slot"
-        in: "query"
-        required: true
-        schema:
-          type: "string"
-          description: "The name of the slot to update (e.g., 'slot1' to 'slot16')."
-          example: "slot1"
-      - name: "new_value"
-        in: "query"
-        required: true
-        schema:
-          type: "string"
-          description: "The new value to set for the specified slot."
-          example: "available"
+          type: "object"
+          properties:
+            unique_id:
+              type: "string"
+              description: "The unique identifier of the store to update."
+              example: "12345"
+            slot:
+              type: "string"
+              description: "The name of the slot to update (e.g., 'slot1' to 'slot16')."
+              example: "slot1"
+            new_value:
+              type: "string"
+              description: "The new value to set for the specified slot."
+              example: "available"
+          required:
+            - unique_id
+            - slot
+            - new_value
     responses:
       '200':
         description: "Successfully updated the slot value"
@@ -35,7 +36,7 @@
               properties:
                 message:
                   type: "string"
-                  example: "Successfully updated slot5 for store with unique_id 'store_12345'."
+                  example: "Successfully updated slot1 for store with unique_id '12345'."
       '400':
         description: "Bad Request if required fields are missing or the slot is invalid"
         content:
@@ -55,7 +56,7 @@
               properties:
                 error:
                   type: "string"
-                  example: "Store with unique_id 'store_12345' does not exist."
+                  example: "Store with unique_id '12345' does not exist."
       '500':
         description: "Internal Server Error if there is an issue with the database or MySQL connection"
         content:
