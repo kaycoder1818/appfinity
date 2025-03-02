@@ -153,14 +153,6 @@ def create_table_stores():
         cursor = get_cursor()
 
         if cursor:
-            # Check if the 'stores' table already exists
-            cursor.execute("SELECT COUNT(*) FROM information_schema.tables WHERE table_name = 'stores'")
-            table_exists = cursor.fetchone()[0]
-            
-            if table_exists:
-                cursor.close()
-                return jsonify({"error": "Table 'stores' already exists."}), 400  # Return an error if the table exists
-            
             # SQL to create the 'stores' table with the specified columns
             create_table_sql = """
             CREATE TABLE IF NOT EXISTS stores (
@@ -199,8 +191,6 @@ def create_table_stores():
     
     except mysql.connector.Error as e:
         return handle_mysql_error(e)
-
-
 
 @app.route('/delete-table-datawatch/', methods=['GET'])
 def delete_datawatch_table():
