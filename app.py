@@ -1159,8 +1159,9 @@ def update_profile():
         if 'name' not in data:
             return jsonify({"error": "'name' is required to update a profile."}), 400
 
-        # Extract name from the data
+        # Extract name and full_name from the data
         name = data["name"]
+        full_name = data.get("full_name")  # full_name is optional
 
         # Validate other fields that are allowed to be updated (fields can be optional)
         fields_to_update = ["id_number", "plate_number", "vehicle_type", "vehicle_model"]
@@ -1184,14 +1185,15 @@ def update_profile():
                 cursor.close()
                 return jsonify({"error": f"Profile with name '{name}' does not exist."}), 404
 
-            # SQL to update the profile fields
+            # SQL to update the profile fields, including full_name
             update_sql = """
             UPDATE profile
             SET 
                 id_number = %s, 
                 plate_number = %s, 
                 vehicle_type = %s, 
-                vehicle_model = %s
+                vehicle_model = %s,
+                full_name = %s
             WHERE name = %s
             """
             
@@ -1201,6 +1203,7 @@ def update_profile():
                 data.get("plate_number", ""),
                 data.get("vehicle_type", ""),
                 data.get("vehicle_model", ""),
+                full_name if full_name else "",  # Only update full_name if provided
                 name
             ))
 

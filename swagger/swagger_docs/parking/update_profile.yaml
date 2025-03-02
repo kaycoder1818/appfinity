@@ -1,7 +1,7 @@
 /profile/update:
   post:
     summary: "Update Profile Record"
-    description: "Updates the profile record in the 'profile' table based on 'name'. The fields 'id_number', 'plate_number', 'vehicle_type', and 'vehicle_model' can be updated."
+    description: "Updates the profile record in the 'profile' table based on 'name'. The fields 'id_number', 'plate_number', 'vehicle_type', 'vehicle_model', and optionally 'full_name' can be updated."
     tags: ["Profile"]
     parameters:
       - name: "body"
@@ -14,21 +14,25 @@
               type: "string"
               description: "The name of the profile to update."
               example: "testuser"
+            full_name:
+              type: "string"
+              description: "The full name of the profile (optional)."
+              example: "John Doe"
             id_number:
               type: "string"
-              description: "The new ID number for the profile."
+              description: "The new ID number for the profile (optional)."
               example: "ID123456789"
             plate_number:
               type: "string"
-              description: "The new vehicle plate number."
+              description: "The new vehicle plate number (optional)."
               example: "XYZ1234"
             vehicle_type:
               type: "string"
-              description: "The new vehicle type (e.g., 'Car', 'Truck')."
+              description: "The new vehicle type (e.g., 'Car', 'Truck') (optional)."
               example: "Car"
             vehicle_model:
               type: "string"
-              description: "The new vehicle model."
+              description: "The new vehicle model (optional)."
               example: "Toyota Camry"
           required:
             - name
