@@ -999,7 +999,7 @@ def delete_user():
         return handle_mysql_error(e)
 
 ## update value of a "slot column" by uniqueid and slot-name-column
-@app.route('/store/update-slot/', methods=['POST'])
+@app.route('/stores/update-slot/', methods=['POST'])
 def update_store_slot():
     try:
         # Check if MySQL is available
@@ -1057,7 +1057,7 @@ def update_store_slot():
         return handle_mysql_error(e)
 
 ## show the all the records of table 'stores'
-@app.route('/store/', methods=['GET'])
+@app.route('/stores', methods=['GET'])
 def get_stores():
     try:
         # Check if MySQL is available
