@@ -1,7 +1,7 @@
 /profile/update:
   post:
     summary: "Update Profile Record"
-    description: "Updates the profile record in the 'profile' table based on 'name' or 'full_name'. The fields 'id_number', 'plate_number', 'vehicle_type', and 'vehicle_model' can be updated. Either 'name' or 'full_name' must be provided to identify the profile."
+    description: "Updates the profile record in the 'profile' table based on 'name'. The fields 'id_number', 'plate_number', 'vehicle_type', and 'vehicle_model' can be updated."
     tags: ["Profile"]
     parameters:
       - name: "body"
@@ -14,10 +14,6 @@
               type: "string"
               description: "The name of the profile to update."
               example: "testuser"
-            full_name:
-              type: "string"
-              description: "The full name of the profile to update."
-              example: "John Doe"
             id_number:
               type: "string"
               description: "The new ID number for the profile."
@@ -36,7 +32,6 @@
               example: "Toyota Camry"
           required:
             - name
-            - full_name
     responses:
       '200':
         description: "Profile updated successfully"
@@ -49,7 +44,7 @@
                   type: "string"
                   example: "Profile updated successfully."
       '400':
-        description: "Bad Request if 'name' or 'full_name' is not provided or any field is empty"
+        description: "Bad Request if 'name' is not provided or any field is empty"
         content:
           application/json:
             schema:
@@ -57,9 +52,9 @@
               properties:
                 error:
                   type: "string"
-                  example: "'name' or 'full_name' is required to update a profile, or a field cannot be empty."
+                  example: "'name' is required to update a profile, or a field cannot be empty."
       '404':
-        description: "Profile not found if no profile matches the given 'name' or 'full_name'"
+        description: "Profile not found if no profile matches the given 'name'"
         content:
           application/json:
             schema:
@@ -67,7 +62,7 @@
               properties:
                 error:
                   type: "string"
-                  example: "Profile with name 'john_doe' does not exist."
+                  example: "Profile with name 'testuser' does not exist."
       '500':
         description: "Internal Server Error if there is an issue with the database or MySQL connection"
         content:
