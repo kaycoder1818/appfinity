@@ -437,7 +437,7 @@ stores_db = [
 ]
 
 ## insert the initial records for stores
-@app.route('/insert-data-to-stores/', methods=['GET'])
+@app.route('/insert-data-to-stores', methods=['GET'])
 def insert_stores():
     try:
         # Check if MySQL is available
@@ -495,7 +495,7 @@ def insert_stores():
         return handle_mysql_error(e)
 
 
-@app.route('/create-table-profile/', methods=['GET'])
+@app.route('/create-table-profile', methods=['GET'])
 def create_table_profile():
     try:
         # Check if MySQL is available
