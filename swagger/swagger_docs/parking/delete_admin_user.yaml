@@ -1,0 +1,67 @@
+/admin/delete:
+  delete:
+    summary: "Delete Admin User"
+    description: "Deletes an admin user from the system based on the provided 'name' and 'password_hash'. Verifies that the user exists with the role 'admin' and deletes the user from the database."
+    tags: ["Admin"]
+    parameters:
+      - name: "body"
+        in: "body"
+        required: true
+        schema:
+          type: "object"
+          properties:
+            name:
+              type: "string"
+              description: "The name of the admin user."
+              example: "adminuser"
+            password_hash:
+              type: "string"
+              description: "The hashed password of the admin user."
+              example: "$2b$12$VvE5xF9sT/qjCjWkHH1vE.VmTaEN8gNN8NoZNW5O0Nm2c8p2kzA0G"
+          required:
+            - name
+            - password_hash
+    responses:
+      '200':
+        description: "Admin user successfully deleted"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                message:
+                  type: "string"
+                  example: "Admin user deleted successfully"
+                status:
+                  type: "string"
+                  example: "ok"
+      '400':
+        description: "Bad Request if required fields are missing"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                error:
+                  type: "string"
+                  example: "Missing required fields: 'name' or 'password_hash'"
+      '404':
+        description: "Not Found if user does not exist or is not an admin"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                error:
+                  type: "string"
+                  example: "User not found or not an admin"
+      '500':
+        description: "Internal Server Error if there is an issue with the database or MySQL connection"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                error:
+                  type: "string"
+                  example: "MySQL database not responding, please check the database service"

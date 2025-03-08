@@ -1,0 +1,79 @@
+/admin/update:
+  put:
+    summary: "Update Admin User Profile"
+    description: "Updates the profile of an admin user with the provided 'name', 'full_name', and 'phone_number'. Ensures the user is an admin before updating the profile."
+    tags: ["Admin"]
+    parameters:
+      - name: "body"
+        in: "body"
+        required: true
+        schema:
+          type: "object"
+          properties:
+            name:
+              type: "string"
+              description: "The name of the admin user whose profile is to be updated."
+              example: "adminuser"
+            full_name:
+              type: "string"
+              description: "The full name of the admin user."
+              example: "Admin User Full Name"
+            phone_number:
+              type: "string"
+              description: "The phone number of the admin user."
+              example: "+1234567890"
+          required:
+            - name
+            - full_name
+            - phone_number
+    responses:
+      '200':
+        description: "Profile updated successfully"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                message:
+                  type: "string"
+                  example: "Profile updated successfully."
+      '400':
+        description: "Bad Request if required fields are missing"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                error:
+                  type: "string"
+                  example: "'name', 'full_name', and 'phone_number' are required to update a profile."
+      '403':
+        description: "Forbidden if the profile is not an admin"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                error:
+                  type: "string"
+                  example: "Only profiles with 'admin' role can be updated."
+      '404':
+        description: "Not Found if the profile does not exist"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                error:
+                  type: "string"
+                  example: "Profile not found."
+      '500':
+        description: "Internal Server Error if there is an issue with the database or MySQL connection"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                error:
+                  type: "string"
+                  example: "MySQL database not responding, please check the database service"

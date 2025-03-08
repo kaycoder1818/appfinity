@@ -1,0 +1,67 @@
+/notifications/add:
+  post:
+    summary: "Add a New Notification"
+    description: "Adds a new notification to the system with the provided 'uniqueId', 'role', 'status', and 'message'. The 'status' must be either 'active' or 'new'."
+    tags: ["Notifications"]
+    parameters:
+      - name: "body"
+        in: "body"
+        required: true
+        schema:
+          type: "object"
+          properties:
+            uniqueId:
+              type: "string"
+              description: "The unique identifier for the notification."
+              example: "abc123"
+            role:
+              type: "string"
+              description: "The role of the user who the notification belongs to (e.g., 'admin', 'user')."
+              example: "admin"
+            status:
+              type: "string"
+              description: "The status of the notification. Must be either 'active' or 'new'."
+              enum:
+                - active
+                - new
+              example: "active"
+            message:
+              type: "string"
+              description: "The message content of the notification."
+              example: "Your profile has been updated successfully."
+          required:
+            - uniqueId
+            - role
+            - status
+            - message
+    responses:
+      '200':
+        description: "Notification successfully added"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                message:
+                  type: "string"
+                  example: "Notification added successfully."
+      '400':
+        description: "Bad Request if required fields are missing or status is invalid"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                error:
+                  type: "string"
+                  example: "'status' must be either 'active' or 'new'."
+      '500':
+        description: "Internal Server Error if there is an issue with the database or MySQL connection"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                error:
+                  type: "string"
+                  example: "MySQL database not responding, please check the database service"

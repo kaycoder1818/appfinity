@@ -1,0 +1,79 @@
+/contact:
+  get:
+    summary: "Get Admin Profiles"
+    description: "Retrieves all admin profiles from the system. If no admin profiles are found, a message is returned indicating no profiles are available."
+    tags: ["Admin"]
+    responses:
+      '200':
+        description: "Successfully retrieved all admin profiles"
+        content:
+          application/json:
+            schema:
+              type: "array"
+              items:
+                type: "object"
+                properties:
+                  id:
+                    type: "integer"
+                    description: "The unique identifier for the profile"
+                    example: 1
+                  name:
+                    type: "string"
+                    description: "The name of the admin"
+                    example: "admin_user"
+                  full_name:
+                    type: "string"
+                    description: "The full name of the admin"
+                    example: "John Doe"
+                  id_number:
+                    type: "string"
+                    description: "The ID number associated with the admin"
+                    example: "12345"
+                  plate_number:
+                    type: "string"
+                    description: "The vehicle's plate number associated with the admin"
+                    example: "XYZ1234"
+                  vehicle_type:
+                    type: "string"
+                    description: "The type of vehicle owned by the admin"
+                    example: "SUV"
+                  vehicle_model:
+                    type: "string"
+                    description: "The model of the vehicle owned by the admin"
+                    example: "Toyota Highlander"
+                  role:
+                    type: "string"
+                    description: "The role of the profile"
+                    example: "admin"
+                  phone_number:
+                    type: "string"
+                    description: "The phone number associated with the admin"
+                    example: "+1234567890"
+                  image_link:
+                    type: "string"
+                    description: "The link to the admin's profile image"
+                    example: "https://example.com/images/admin_user.jpg"
+                  timestamp:
+                    type: "string"
+                    description: "The timestamp when the profile was created"
+                    example: "2025-03-08T12:34:56"
+      '404':
+        description: "No admin profiles found"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                message:
+                  type: "string"
+                  example: "No admin profiles found."
+      '500':
+        description: "Internal Server Error if there is an issue with the database or MySQL connection"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                error:
+                  type: "string"
+                  example: "MySQL database not responding, please check the database service"

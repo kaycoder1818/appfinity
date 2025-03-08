@@ -1,0 +1,76 @@
+/notifications:
+  get:
+    summary: "Retrieve Notifications"
+    description: "Retrieves a list of notifications from the system, with optional filtering by 'status', sorting by 'timestamp', and limiting the number of results. Supports sorting by 'latest' or 'old' and filtering by 'status' ('active', 'new')."
+    tags: ["Notifications"]
+    parameters:
+      - name: "sort"
+        in: "query"
+        description: "Sort the notifications by timestamp. Options are 'latest' for descending order or 'old' for ascending order."
+        required: false
+        schema:
+          type: "string"
+          enum:
+            - latest
+            - old
+        example: "latest"
+      - name: "status"
+        in: "query"
+        description: "Filter notifications by status. Options are 'active' or 'new'."
+        required: false
+        schema:
+          type: "string"
+          enum:
+            - active
+            - new
+        example: "active"
+      - name: "limit"
+        in: "query"
+        description: "Limit the number of notifications returned. Use 'all' to get all notifications or a positive integer to limit the number of results."
+        required: false
+        schema:
+          type: "string"
+        example: "10"
+    responses:
+      '200':
+        description: "List of notifications retrieved successfully"
+        content:
+          application/json:
+            schema:
+              type: "array"
+              items:
+                type: "object"
+                properties:
+                  id:
+                    type: "integer"
+                    description: "Notification ID"
+                  message:
+                    type: "string"
+                    description: "Message of the notification"
+                  status:
+                    type: "string"
+                    description: "Status of the notification"
+                  timestamp:
+                    type: "string"
+                    description: "Timestamp when the notification was created"
+                    example: "2025-03-08T12:34:56Z"
+      '400':
+        description: "Bad Request if invalid value is provided for 'limit', 'status', or 'sort'"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                error:
+                  type: "string"
+                  example: "Invalid value for 'limit' or 'status'."
+      '500':
+        description: "Internal Server Error if there is an issue with the database or MySQL connection"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                error:
+                  type: "string"
+                  example: "MySQL database not responding, please check the database service"

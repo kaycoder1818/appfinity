@@ -1,0 +1,49 @@
+/notifications/all:
+  get:
+    summary: "Get All Notifications"
+    description: "Retrieves all notification records from the system. If no notifications are found, a message is returned indicating that no records are available."
+    tags: ["Notifications"]
+    responses:
+      '200':
+        description: "Successfully retrieved all notification records"
+        content:
+          application/json:
+            schema:
+              type: "array"
+              items:
+                type: "object"
+                properties:
+                  id:
+                    type: "integer"
+                    description: "The unique identifier for the notification"
+                    example: 1
+                  uniqueId:
+                    type: "string"
+                    description: "The unique identifier associated with the notification"
+                    example: "abc123"
+                  role:
+                    type: "string"
+                    description: "The role associated with the notification"
+                    example: "admin"
+                  status:
+                    type: "string"
+                    description: "The current status of the notification"
+                    example: "active"
+                  message:
+                    type: "string"
+                    description: "The message content of the notification"
+                    example: "You have a new system alert"
+                  timestamp:
+                    type: "string"
+                    description: "The timestamp when the notification was logged"
+                    example: "2025-03-08T12:34:56"
+      '500':
+        description: "Internal Server Error if there is an issue with the database or MySQL connection"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                error:
+                  type: "string"
+                  example: "MySQL database not responding, please check the database service"

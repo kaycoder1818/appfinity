@@ -1,0 +1,53 @@
+/violations/all:
+  get:
+    summary: "Get All Violations"
+    description: "Retrieves all violation records from the system. If no violations are found, a message is returned indicating that no records are available."
+    tags: ["Violations"]
+    responses:
+      '200':
+        description: "Successfully retrieved all violation records"
+        content:
+          application/json:
+            schema:
+              type: "array"
+              items:
+                type: "object"
+                properties:
+                  id:
+                    type: "integer"
+                    description: "The unique identifier for the violation"
+                    example: 1
+                  name:
+                    type: "string"
+                    description: "The name associated with the violation"
+                    example: "Violation A"
+                  role:
+                    type: "string"
+                    description: "The role associated with the violation"
+                    example: "admin"
+                  status:
+                    type: "string"
+                    description: "The current status of the violation"
+                    example: "active"
+                  type:
+                    type: "string"
+                    description: "The type of the violation"
+                    example: "policy breach"
+                  info:
+                    type: "string"
+                    description: "Additional information about the violation"
+                    example: "Policy breach detected in system"
+                  timestamp:
+                    type: "string"
+                    description: "The timestamp when the violation was logged"
+                    example: "2025-03-08T12:34:56"
+      '500':
+        description: "Internal Server Error if there is an issue with the database or MySQL connection"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                error:
+                  type: "string"
+                  example: "MySQL database not responding, please check the database service"

@@ -1,0 +1,72 @@
+/admin/add:
+  post:
+    summary: "Add a New Admin User"
+    description: "Creates a new admin user in the system with the provided 'name', 'password_hash', and 'email'. Generates a unique token and sets the user's status to 'inactive'. Validates that all required fields are provided, and checks MySQL availability."
+    tags: ["Admin"]
+    parameters:
+      - name: "body"
+        in: "body"
+        required: true
+        schema:
+          type: "object"
+          properties:
+            name:
+              type: "string"
+              description: "The name of the admin user."
+              example: "adminuser"
+            password_hash:
+              type: "string"
+              description: "The hashed password of the admin user."
+              example: "$2b$12$VvE5xF9sT/qjCjWkHH1vE.VmTaEN8gNN8NoZNW5O0Nm2c8p2kzA0G"
+            email:
+              type: "string"
+              description: "The email address of the admin user."
+              example: "adminuser@example.com"
+          required:
+            - name
+            - password_hash
+            - email
+    responses:
+      '200':
+        description: "Admin user successfully created"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                message:
+                  type: "string"
+                  example: "Admin User added successfully"
+                status:
+                  type: "string"
+                  example: "ok"
+                role:
+                  type: "string"
+                  example: "admin"
+                token:
+                  type: "string"
+                  example: "d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2"
+                timestamp:
+                  type: "string"
+                  format: "date-time"
+                  example: "2025-03-08T14:25:00"
+      '400':
+        description: "Bad Request if required fields are missing"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                error:
+                  type: "string"
+                  example: "Missing required fields: 'name', 'password_hash', or 'email'"
+      '500':
+        description: "Internal Server Error if there is an issue with MySQL or database connection"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                error:
+                  type: "string"
+                  example: "MySQL database not responding, please check the database service"

@@ -1,0 +1,69 @@
+/violations/add:
+  post:
+    summary: "Add a New Violation"
+    description: "Adds a new violation record to the system with the provided 'name', 'role', 'status', 'type', and 'info'. Ensures the violation name is unique and that all required fields are provided."
+    tags: ["Violations"]
+    parameters:
+      - name: "body"
+        in: "body"
+        required: true
+        schema:
+          type: "object"
+          properties:
+            name:
+              type: "string"
+              description: "The user of violations"
+              example: "testuser"
+            role:
+              type: "string"
+              description: "The role associated with the violation."
+              example: "user"
+            status:
+              type: "string"
+              description: "The status of the violation."
+              example: "active"
+            type:
+              type: "string"
+              description: "The type of violation."
+              example: "low"
+            info:
+              type: "string"
+              description: "Additional information about the violation."
+              example: "User failed to pay within the due date."
+          required:
+            - name
+            - role
+            - status
+            - type
+            - info
+    responses:
+      '200':
+        description: "Violation record successfully added"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                message:
+                  type: "string"
+                  example: "Violation record added successfully."
+      '400':
+        description: "Bad Request if required fields are missing or violation name already exists"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                error:
+                  type: "string"
+                  example: "'name' is required to add a violation."
+      '500':
+        description: "Internal Server Error if there is an issue with the database or MySQL connection"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                error:
+                  type: "string"
+                  example: "MySQL database not responding, please check the database service"
