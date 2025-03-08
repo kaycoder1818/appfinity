@@ -1346,10 +1346,15 @@ def delete_profile():
 @app.route('/', methods=['GET'])
 def index():
     if is_mysql_available():
-        return jsonify({"message": "Welcome to the appfinity API"})
+        return jsonify({
+            "message": {
+                "status": "ok",
+                "developer": "kayven",
+                "email": "yvendee2020@gmail.com"
+            }
+        })
     else:
         return jsonify({"error": "MySQL database not responding, please check the database service"}), 500
-
 
 # @app.route('/', methods=['GET'])
 # def index():
