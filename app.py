@@ -845,10 +845,6 @@ def insert_initial_notifications():
             # Step 3: Define the initial notifications data with hardcoded status "new"
             initial_notifications = [
                 {"uniqueId": "notif-001", "role": "admin", "message": "System update scheduled for tomorrow.", "status": "new"},
-                {"uniqueId": "notif-002", "role": "user", "message": "Your password was successfully changed.", "status": "new"},
-                {"uniqueId": "notif-003", "role": "admin", "message": "New user registration pending approval.", "status": "new"},
-                {"uniqueId": "notif-004", "role": "user", "message": "Maintenance window scheduled for 2 AM.", "status": "new"},
-                {"uniqueId": "notif-005", "role": "admin", "message": "Database backup completed successfully.", "status": "new"}
             ]
 
             # Step 4: Insert each notification record into the notifications table
