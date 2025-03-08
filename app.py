@@ -932,9 +932,10 @@ def insert_violations():
         else:
             return jsonify({"error": "Database connection not available"}), 500
     
-    except mysql.connector.Error as e:
-        # Step 9: Handle MySQL errors
-        return handle_mysql_error(e)
+    except mysql.connector.Error as error:
+        # Step 9: Handle MySQL errors by calling a custom error handler
+        return handle_mysql_error(error)
+
 
 ## show the all the records of table 'datawatch'
 @app.route('/field', methods=['GET'])
