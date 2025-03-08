@@ -4,7 +4,6 @@ import mysql.connector
 from datetime import datetime
 import os
 from swagger.swaggerui import setup_swagger
-import uuid
 import datetime
 import random
 import string
@@ -51,6 +50,8 @@ else:
     print("MYSQL_DETAILS environment variable is not set.")
     db_connection = None
 
+def generate_random_string(length=32):
+    return ''.join(random.choices(string.ascii_letters + string.digits, k=length))
 
 def get_cursor():
     if db_connection:
@@ -1366,9 +1367,9 @@ def add_admin_user():
         password_hash = data["password_hash"]
         email = data["email"]
 
-        # Generate a unique token using UUID
-        token = str(uuid.uuid4())
-        
+        # Generate a unique token 
+        token = generate_random_token()
+
         # Get the current timestamp
         timestamp = datetime.now()
         
