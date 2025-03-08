@@ -830,18 +830,19 @@ def bulk_insert_profiles():
         return handle_mysql_error(e)
 
 # Insert the initial records for notifications
+# Insert the initial records for notifications
 @app.route('/insert-data-to-notifications', methods=['GET'])
 def insert_initial_notifications():
     try:
-        # Check if MySQL is available
+        # Step 1: Check if MySQL is available (Database service check)
         if not is_mysql_available():
             return jsonify({"error": "MySQL database not responding, please check the database service"}), 500
 
-        # Get a database cursor
+        # Step 2: Get a database cursor
         cursor = get_cursor()
 
         if cursor:
-            # Sample initial notifications data with hardcoded status "new"
+            # Step 3: Define the initial notifications data with hardcoded status "new"
             initial_notifications = [
                 {"uniqueId": "notif-001", "role": "admin", "message": "System update scheduled for tomorrow.", "status": "new"},
                 {"uniqueId": "notif-002", "role": "user", "message": "Your password was successfully changed.", "status": "new"},
@@ -850,55 +851,58 @@ def insert_initial_notifications():
                 {"uniqueId": "notif-005", "role": "admin", "message": "Database backup completed successfully.", "status": "new"}
             ]
 
-            # Insert each notification record into the notifications table
+            # Step 4: Insert each notification record into the notifications table
             for notification in initial_notifications:
                 unique_id = notification["uniqueId"]
                 role = notification["role"]
                 message = notification["message"]
-                status = notification["status"]  # This is hardcoded as "new"
+                status = notification["status"]  # Hardcoded status as "new"
                 timestamp = "CURRENT_TIMESTAMP"  # Automatically set timestamp to current time
 
-                # Check if the uniqueId already exists in the notifications table
+                # Step 5: Check if the uniqueId already exists in the notifications table
                 cursor.execute("SELECT COUNT(*) FROM notifications WHERE uniqueId = %s", (unique_id,))
                 unique_id_exists = cursor.fetchone()[0]
 
                 if unique_id_exists:
                     continue  # Skip insertion if the uniqueId already exists
 
-                # SQL to insert new notification
+                # Step 6: SQL to insert new notification
                 insert_sql = """
                 INSERT INTO notifications (uniqueId, role, status, message, timestamp)
                 VALUES (%s, %s, %s, %s, %s);
                 """
 
-                # Execute the insertion with hardcoded status "new"
+                # Step 7: Execute the insertion with hardcoded status "new"
                 cursor.execute(insert_sql, (unique_id, role, status, message, timestamp))
 
-            # Commit the changes to the database
+            # Step 8: Commit the changes to the database
             db_connection.commit()
             cursor.close()
 
+            # Step 9: Return success message with number of records inserted
             return jsonify({"message": f"{len(initial_notifications)} initial notification records inserted successfully."}), 200
 
         else:
+            # If cursor is not available, return an error
             return jsonify({"error": "Database connection not available"}), 500
 
     except mysql.connector.Error as e:
+        # Step 10: Error handling for MySQL errors
         return handle_mysql_error(e)
 
 # Insert the initial records for violations
-@app.route('/insert-initial-violations', methods=['GET'])
+@app.route('/insert-data-to-violations', methods=['GET'])
 def insert_initial_violations():
     try:
-        # Check if MySQL is available
+        # Step 1: Check if MySQL is available (Database service check)
         if not is_mysql_available():
             return jsonify({"error": "MySQL database not responding, please check the database service"}), 500
 
-        # Get a database cursor
+        # Step 2: Get a database cursor
         cursor = get_cursor()
 
         if cursor:
-            # Sample initial violations data
+            # Step 3: Define the initial violations data
             initial_violations = [
                 {"name": "Violation 001", "role": "admin", "status": "new", "type": "speeding", "info": "Exceeded speed limit by 20 km/h"},
                 {"name": "Violation 002", "role": "user", "status": "new", "type": "parking", "info": "Parked in a no-parking zone"},
@@ -907,7 +911,7 @@ def insert_initial_violations():
                 {"name": "Violation 005", "role": "admin", "status": "new", "type": "parking", "info": "Parking in a handicapped spot without permit"}
             ]
 
-            # Insert each violation record into the violations table
+            # Step 4: Insert each violation record into the violations table
             for violation in initial_violations:
                 name = violation["name"]
                 role = violation["role"]
@@ -916,32 +920,35 @@ def insert_initial_violations():
                 info = violation["info"]
                 timestamp = "CURRENT_TIMESTAMP"  # Automatically set timestamp to current time
 
-                # Check if the name already exists in the violations table
+                # Step 5: Check if the name already exists in the violations table
                 cursor.execute("SELECT COUNT(*) FROM violations WHERE name = %s", (name,))
                 name_exists = cursor.fetchone()[0]
 
                 if name_exists:
                     continue  # Skip insertion if the name already exists
 
-                # SQL to insert new violation
+                # Step 6: SQL to insert new violation
                 insert_sql = """
                 INSERT INTO violations (name, role, status, type, info, timestamp)
                 VALUES (%s, %s, %s, %s, %s, %s);
                 """
 
-                # Execute the insertion
+                # Step 7: Execute the insertion
                 cursor.execute(insert_sql, (name, role, status, violation_type, info, timestamp))
 
-            # Commit the changes to the database
+            # Step 8: Commit the changes to the database
             db_connection.commit()
             cursor.close()
 
+            # Step 9: Return success message with number of records inserted
             return jsonify({"message": f"{len(initial_violations)} initial violation records inserted successfully."}), 200
 
         else:
+            # If cursor is not available, return an error
             return jsonify({"error": "Database connection not available"}), 500
 
     except mysql.connector.Error as e:
+        # Step 10: Error handling for MySQL errors
         return handle_mysql_error(e)
 
 ## show the all the records of table 'datawatch'
