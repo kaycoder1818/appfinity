@@ -733,7 +733,6 @@ def insert_data():
 @app.route('/insert-data-to-users', methods=['GET'])
 def insert_users():
     try:
-
         if not is_mysql_available():
             return jsonify({"error": "MySQL database not responding, please check the database service"}), 500
         
@@ -778,8 +777,13 @@ def insert_users():
                 if user_exists:
                     return jsonify({"error": f"User with name '{user['name']}' already exists."}), 400
                 
-                # Execute the insert query for the user if the name doesn't exist
-                cursor.execute(insert_sql, (user['name'], user['password_hash'], user['role'], user['email'], user['token']))
+                try:
+                    # Execute the insert query for the user if the name doesn't exist
+                    cursor.execute(insert_sql, (user['name'], user['password_hash'], user['role'], user['email'], user['token'], user['rfid'], user['assignedslot']))
+                except mysql.connector.Error as e:
+                    print(f"Error inserting user {user['name']}: {e}")
+                    db_connection.rollback()  # Rollback on error
+                    return jsonify({"error": f"Failed to insert user '{user['name']}'. Please check the data."}), 500
             
             # Commit the changes to the database
             db_connection.commit()
@@ -791,7 +795,9 @@ def insert_users():
             return jsonify({"error": "Database connection not available"}), 500
     
     except mysql.connector.Error as e:
-        return handle_mysql_error(e)
+        print(f"Database error: {e}")
+        return jsonify({"error": "MySQL database operation failed. Please check the database connection."}), 500
+
 
 ## insert the initial records for stores
 @app.route('/insert-data-to-stores', methods=['GET'])
