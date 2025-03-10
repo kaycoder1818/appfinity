@@ -765,8 +765,8 @@ def insert_users():
         if cursor:
             # Prepare the SQL statement to insert data into 'users' table
             insert_sql = """
-            INSERT INTO users (name, password_hash, role, email, token, rfid, timestamp)
-            VALUES (%s, %s, %s, %s, %s, %s, NOW());
+            INSERT INTO users (name, password_hash, role, email, token, rfid, assignedslot, timestamp)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, NOW());
             """
             
             # Iterate over users_db to insert users one by one
