@@ -1290,10 +1290,13 @@ def get_users():
             cursor.execute("SELECT * FROM users")
             users = cursor.fetchall()
             
+            if not users:
+                return jsonify({"message": "No users found."}), 404
+            
             # Prepare the list to return in JSON format
             users_list = []
             for user in users:
-                # Convert each user to a dictionary (assuming your table has id, name, etc. columns)
+                # Assuming your table columns are id, name, password_hash, role, email, status, token, rfid, assignedslot, timestamp
                 users_list.append({
                     "id": user[0],
                     "name": user[1],
@@ -1302,7 +1305,9 @@ def get_users():
                     "email": user[4],
                     "status": user[5],
                     "token": user[6],
-                    "timestamp": user[7]
+                    "rfid": user[7],  # assuming the column exists
+                    "assignedslot": user[8],  # assuming the column exists
+                    "timestamp": user[9]
                 })
             
             # Close the cursor
@@ -1315,7 +1320,8 @@ def get_users():
             return jsonify({"error": "Database connection not available"}), 500
     
     except mysql.connector.Error as e:
-        return handle_mysql_error(e)
+        print(f"Database error: {e}")
+        return jsonify({"error": "MySQL database operation failed. Please check the database connection."}), 500
 
 ## adding the new user
 @app.route('/users/add', methods=['POST'])
