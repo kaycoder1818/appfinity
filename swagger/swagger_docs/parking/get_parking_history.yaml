@@ -1,0 +1,89 @@
+/parking-history:
+  get:
+    summary: "Retrieve Parking History"
+    description: "Retrieves a list of parking history records with optional filtering by 'status', sorting by 'timestamp', and limiting the number of results. Supports sorting by 'latest' or 'old' and filtering by 'status' ('active', 'completed', 'pending')."
+    tags: ["Parking History"]
+    parameters:
+      - name: "sort"
+        in: "query"
+        description: "Sort the parking history by timestamp. Options are 'latest' for descending order or 'old' for ascending order."
+        required: false
+        schema:
+          type: "string"
+          enum:
+            - latest
+            - old
+        example: "latest"
+      - name: "status"
+        in: "query"
+        description: "Filter parking history by status. Options are 'active', 'completed', or 'pending'."
+        required: false
+        schema:
+          type: "string"
+          enum:
+            - active
+            - completed
+            - pending
+        example: "active"
+      - name: "limit"
+        in: "query"
+        description: "Limit the number of parking history records returned. Use 'all' to get all records or a positive integer to limit the number of results."
+        required: false
+        schema:
+          type: "string"
+        example: "10"
+    responses:
+      '200':
+        description: "List of parking history records retrieved successfully"
+        content:
+          application/json:
+            schema:
+              type: "array"
+              items:
+                type: "object"
+                properties:
+                  id:
+                    type: "integer"
+                    description: "Parking history ID"
+                  name:
+                    type: "string"
+                    description: "Name associated with the parking record"
+                  role:
+                    type: "string"
+                    description: "Role associated with the parking record"
+                  status:
+                    type: "string"
+                    description: "Status of the parking record"
+                  type:
+                    type: "string"
+                    description: "Type of the parking record"
+                  info:
+                    type: "string"
+                    description: "Additional information about the parking record"
+                  slotname:
+                    type: "string"
+                    description: "Name of the parking slot"
+                  timestamp:
+                    type: "string"
+                    description: "Timestamp when the parking record was created"
+                    example: "2025-03-08T12:34:56Z"
+      '400':
+        description: "Bad Request if an invalid value is provided for 'limit', 'status', or 'sort'"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                error:
+                  type: "string"
+                  example: "Invalid value for 'limit' or 'status'."
+      '500':
+        description: "Internal Server Error if there is an issue with the database or MySQL connection"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                error:
+                  type: "string"
+                  example: "MySQL database not responding, please check the database service"

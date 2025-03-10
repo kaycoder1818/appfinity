@@ -1,7 +1,7 @@
 /users/add:
   post:
     summary: "Add a New User"
-    description: "Creates a new user in the system with the provided 'name', 'password_hash', and optional 'role'. Validates that both 'name' and 'password_hash' are provided, and checks if the user already exists."
+    description: "Creates a new user in the system with the provided 'name', 'password_hash', 'email', 'rfid', 'assignedslot', and optional 'role'. Validates that 'name', 'password_hash', 'email', 'rfid', and 'assignedslot' are provided, and checks if the user already exists. Optionally assigns a role, defaulting to '' if not provided."
     tags: ["Users"]
     parameters:
       - name: "body"
@@ -18,6 +18,18 @@
               type: "string"
               description: "The hashed password of the user."
               example: "$2b$12$VvE5xF9sT/qjCjWkHH1vE.VmTaEN8gNN8NoZNW5O0Nm2c8p2kzA0G"
+            email:
+              type: "string"
+              description: "The email of the user."
+              example: "testuser@example.com"
+            rfid:
+              type: "string"
+              description: "The RFID associated with the user."
+              example: "rfid123456"
+            assignedslot:
+              type: "string"
+              description: "The assigned slot for the user."
+              example: "slot1"
             role:
               type: "string"
               description: "The role of the user (optional). Valid roles are 'admin', 'user', 'guest'. Defaults to '' if not provided."
@@ -25,6 +37,9 @@
           required:
             - name
             - password_hash
+            - email
+            - rfid
+            - assignedslot
     responses:
       '201':
         description: "User successfully created"
@@ -45,7 +60,7 @@
               properties:
                 error:
                   type: "string"
-                  example: "Both 'name' and 'password_hash' are required fields."
+                  example: "Fields 'name', 'password_hash', 'email', 'rfid', and 'assignedslot' are required."
       '500':
         description: "Internal Server Error if there is an issue with the database or MySQL connection"
         content:

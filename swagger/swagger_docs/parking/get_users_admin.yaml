@@ -1,0 +1,53 @@
+/admin:
+  get:
+    summary: "Get all users. Check if there's admin role"
+    description: "Retrieve all records from the 'users' table. Please note admin is just a role"
+    tags: ["Admin"]
+    responses:
+      '200':
+        description: "Successful response with a list of users"
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                users:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                        description: "User ID"
+                      name:
+                        type: string
+                        description: "User's name"
+                      password_hash:
+                        type: string
+                        description: "Hashed password"
+                      role:
+                        type: string
+                        description: "Role of the user"
+                      email:
+                        type: string
+                        description: "User's email"
+                      status:
+                        type: string
+                        description: "Status of the user"
+                      token:
+                        type: string
+                        description: "User's token"
+                      timestamp:
+                        type: string
+                        format: date-time
+                        description: "Timestamp of when the record was created"
+      '500':
+        description: "Internal Server Error if MySQL is not available or if there is a database connection issue"
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                error:
+                  type: string
+                  description: "Error message"

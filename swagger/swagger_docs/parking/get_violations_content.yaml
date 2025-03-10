@@ -1,0 +1,60 @@
+/violations-content:
+  get:
+    summary: "Get all violations content"
+    description: "Retrieve all records from the 'violations' table. Returns a list of violations with details such as ID, name, role, status, type, info, and timestamp."
+    tags: ["Violations"]
+    responses:
+      '200':
+        description: "Successful response with a list of violations"
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                violations:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                        description: "Violation ID"
+                      name:
+                        type: string
+                        description: "Name associated with the violation"
+                      role:
+                        type: string
+                        description: "Role associated with the violation"
+                      status:
+                        type: string
+                        description: "Status of the violation"
+                      type:
+                        type: string
+                        description: "Type of the violation"
+                      info:
+                        type: string
+                        description: "Additional information about the violation"
+                      timestamp:
+                        type: string
+                        format: date-time
+                        description: "Timestamp when the violation record was created"
+      '500':
+        description: "Internal Server Error if MySQL is not available or if there is a database connection issue"
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                error:
+                  type: string
+                  description: "Error message"
+      '200':
+        description: "No violations found"
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  description: "Message indicating no violations were found"

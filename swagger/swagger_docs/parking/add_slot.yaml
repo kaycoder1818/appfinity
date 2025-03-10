@@ -1,0 +1,59 @@
+/stores/add:
+  post:
+    summary: "Add New Store Slot Column"
+    description: "Adds a new slot column to the 'stores' table. The new column is named 'slotX' where 'X' is the next available slot number. The store with the provided 'unique_id' must exist in the 'stores' table."
+    tags: ["Stores"]
+    parameters:
+      - name: "body"
+        in: "body"
+        required: true
+        schema:
+          type: "object"
+          properties:
+            unique_id:
+              type: "string"
+              description: "The unique identifier of the store for which a new slot column is to be added."
+              example: "store123"
+          required:
+            - unique_id
+    responses:
+      '200':
+        description: "New column added successfully to the 'stores' table"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                message:
+                  type: "string"
+                  example: "New column 'slot17' added to the 'stores' table."
+      '400':
+        description: "Bad Request if the required 'unique_id' field is missing"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                error:
+                  type: "string"
+                  example: "'unique_id' is required."
+      '404':
+        description: "Store not found if no store matches the provided 'unique_id'"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                error:
+                  type: "string"
+                  example: "Store with unique_id 'store123' not found."
+      '500':
+        description: "Internal Server Error if there is an issue with the database or MySQL connection"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                error:
+                  type: "string"
+                  example: "MySQL database not responding, please check the database service"

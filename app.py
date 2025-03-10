@@ -18,37 +18,74 @@ setup_swagger(app)
 # Load environment variables from .env file
 # load_dotenv()
 
-# Retrieve MySQL connection details from environment variable
-mysql_details = os.getenv('MYSQL_DETAILS')
+# # Retrieve MySQL connection details from environment variable
+# mysql_details = os.getenv('MYSQL_DETAILS')
 
-if mysql_details:
-    # Split the details by "@"
-    details = mysql_details.split('@')
+# if mysql_details:
+#     # Split the details by "@"
+#     details = mysql_details.split('@')
     
-    # Extract the individual values
-    host = details[0]
-    user = details[1]
-    password = details[2]
-    database = details[3]
-    port = int(details[4])
+#     # Extract the individual values
+#     host = details[0]
+#     user = details[1]
+#     password = details[2]
+#     database = details[3]
+#     port = int(details[4])
 
-    # MySQL connection setup
-    try:
-        db_connection = mysql.connector.connect(
-            host=host,
-            user=user,
-            password=password,
-            database=database,
-            port=port
-        )
-        print("Connection successful")
+#     # MySQL connection setup
+#     try:
+#         db_connection = mysql.connector.connect(
+#             host=host,
+#             user=user,
+#             password=password,
+#             database=database,
+#             port=port
+#         )
+#         print("Connection successful")
     
-    except mysql.connector.Error as err:
-        print(f"Error connecting to MySQL: {e}")
+#     except mysql.connector.Error as err:
+#         print(f"Error connecting to MySQL: {e}")
+#         db_connection = None
+# else:
+#     print("MYSQL_DETAILS environment variable is not set.")
+#     db_connection = None
+
+# Check if the file "dev" exists
+if not os.path.exists('dev'):
+    # Retrieve MySQL connection details from environment variable
+    mysql_details = os.getenv('MYSQL_DETAILS')
+
+    if mysql_details:
+        # Split the details by "@"
+        details = mysql_details.split('@')
+
+        # Extract the individual values
+        host = details[0]
+        user = details[1]
+        password = details[2]
+        database = details[3]
+        port = int(details[4])
+
+        # MySQL connection setup
+        try:
+            db_connection = mysql.connector.connect(
+                host=host,
+                user=user,
+                password=password,
+                database=database,
+                port=port
+            )
+            print("Connection successful")
+
+        except mysql.connector.Error as err:
+            print(f"Error connecting to MySQL: {err}")
+            db_connection = None
+    else:
+        print("MYSQL_DETAILS environment variable is not set.")
         db_connection = None
 else:
-    print("MYSQL_DETAILS environment variable is not set.")
-    db_connection = None
+    print("File 'dev' exists. Skipping MySQL connection setup.")
+
 
 def generate_random_string(length=32):
     return ''.join(random.choices(string.ascii_letters + string.digits, k=length))
@@ -134,6 +171,8 @@ def create_table_users():
                 email TEXT,
                 status TEXT,
                 token TEXT,
+                rfid TEXT,
+                assignedslot TEXT,
                 timestamp DATETIME
             );
             """
@@ -352,6 +391,55 @@ def create_table_violations():
     except mysql.connector.Error as e:
         return handle_mysql_error(e)
 
+@app.route('/create-table-parking-history', methods=['GET'])
+def create_table_parking_history():
+    try:
+        # Check if MySQL is available
+        if not is_mysql_available():
+            return jsonify({"error": "MySQL database not responding, please check the database service"}), 500
+
+        # Get a database cursor
+        cursor = get_cursor()
+
+        if cursor:
+            # Check if the 'parking_history' table already exists
+            cursor.execute("SELECT COUNT(*) FROM information_schema.tables WHERE table_name = 'parking_history'")
+            table_exists = cursor.fetchone()[0]
+
+            if table_exists:
+                cursor.close()
+                return jsonify({"message": "Table 'parking_history' already exists."}), 200
+            
+            # SQL to create the 'parking_history' table with the specified columns
+            create_table_sql = """
+            CREATE TABLE parking_history (
+                id INT AUTO_INCREMENT PRIMARY KEY,          
+                name TEXT,                                  
+                role TEXT,                                  
+                status TEXT,                               
+                type TEXT,                                 
+                info TEXT,                                 
+                slotname TEXT,                             
+                timestamp DATETIME DEFAULT CURRENT_TIMESTAMP 
+            );
+            """
+
+            # Execute the create table query
+            cursor.execute(create_table_sql)
+
+            # Commit the changes to the database
+            db_connection.commit()
+
+            # Close the cursor
+            cursor.close()
+
+            return jsonify({"message": "Table 'parking_history' created successfully."}), 200
+
+        else:
+            return jsonify({"error": "Database connection not available"}), 500
+
+    except mysql.connector.Error as e:
+        return handle_mysql_error(e)
 
 @app.route('/delete-table-datawatch', methods=['GET'])
 def delete_datawatch_table():
@@ -575,6 +663,41 @@ def delete_table_violations():
     except mysql.connector.Error as e:
         return handle_mysql_error(e)
 
+@app.route('/delete-table-parking-history', methods=['GET'])
+def delete_table_parking_history():
+    try:
+        # Check if MySQL is available
+        if not is_mysql_available():
+            return jsonify({"error": "MySQL database not responding, please check the database service"}), 500
+        
+        # Get a database cursor
+        cursor = get_cursor()
+        
+        if cursor:
+            # Check if the 'parking_history' table exists
+            cursor.execute("SELECT COUNT(*) FROM information_schema.tables WHERE table_name = 'parking_history'")
+            table_exists = cursor.fetchone()[0]
+            
+            if not table_exists:
+                return jsonify({"message": "Table 'parking_history' does not exist."}), 404
+            
+            # SQL to drop the 'parking_history' table
+            drop_table_sql = "DROP TABLE parking_history;"
+            
+            # Execute the drop table query
+            cursor.execute(drop_table_sql)
+            
+            db_connection.commit()
+            cursor.close()
+            
+            return jsonify({"message": "Table 'parking_history' deleted successfully."}), 200
+        
+        else:
+            return jsonify({"error": "Database connection not available"}), 500
+    
+    except mysql.connector.Error as e:
+        return handle_mysql_error(e)
+
 ## insert the initial records for datawatch
 @app.route('/insert-data-to-datawatch', methods=['GET'])
 def insert_data():
@@ -621,9 +744,11 @@ def insert_users():
         users_db = [
             {
                 "name": "testuser",
-                "password_hash": "12345",
+                "password_hash": "12345x",
                 "role": "admin", 
                 "email": "-",
+                "rfid": "53FC0727",
+                "assignedslot": "slot1",
                 "token": "-",
             },
             {
@@ -631,6 +756,8 @@ def insert_users():
                 "password_hash": "12345",
                 "role": "guest", 
                 "email": "-",
+                "rfid": "23XX0725",
+                "assignedslot": "slot2s",
                 "token": "-",
             }
         ]
@@ -638,8 +765,8 @@ def insert_users():
         if cursor:
             # Prepare the SQL statement to insert data into 'users' table
             insert_sql = """
-            INSERT INTO users (name, password_hash, role, email, token, timestamp)
-            VALUES (%s, %s, %s, %s, %s, NOW());
+            INSERT INTO users (name, password_hash, role, email, token, rfid, timestamp)
+            VALUES (%s, %s, %s, %s, %s, %s, NOW());
             """
             
             # Iterate over users_db to insert users one by one
@@ -829,7 +956,6 @@ def bulk_insert_profiles():
     except mysql.connector.Error as e:
         return handle_mysql_error(e)
 
-
 # Insert the initial records for notifications
 @app.route('/insert-data-to-notifications', methods=['GET'])
 def insert_notifications():
@@ -936,6 +1062,54 @@ def insert_violations():
         # Step 9: Handle MySQL errors by calling a custom error handler
         return handle_mysql_error(error)
 
+# Insert the initial records for parking history
+@app.route('/insert-data-to-parking-history', methods=['GET'])
+def insert_parking_history():
+    try:
+        # Step 1: Check if MySQL is available (Database service check)
+        if not is_mysql_available():
+            return jsonify({"error": "MySQL database not responding, please check the database service"}), 500
+        
+        # Step 2: Get a database cursor
+        cursor = get_cursor()
+
+        # Step 3: List of parking history to insert
+        parking_history_db = [
+            {"name": "testuser", "role": "user", "status": "-", "type": "-", "info": "-", "slotname": "-"}
+        ]
+        
+        if cursor:
+            # Step 4: Prepare the SQL statement to insert data into 'parking_history' table
+            insert_sql = """
+            INSERT INTO parking_history (name, role, status, type, info, slotname, timestamp)
+            VALUES (%s, %s, %s, %s, %s, %s, NOW());
+            """
+            
+            # Step 5: Iterate over parking_history_db to insert parking history one by one
+            for parking in parking_history_db:
+                # Check if the parking record with the same name and slot already exists
+                cursor.execute("SELECT COUNT(*) FROM parking_history WHERE name = %s AND slotname = %s", (parking['name'], parking['slotname']))
+                record_exists = cursor.fetchone()[0]
+                
+                if record_exists:
+                    return jsonify({"error": f"Parking history for '{parking['name']}' in slot '{parking['slotname']}' already exists."}), 400
+                
+                # Step 6: Execute the insert query for the parking history if it doesn't exist
+                cursor.execute(insert_sql, (parking['name'], parking['role'], parking['status'], parking['type'], parking['info'], parking['slotname']))
+            
+            # Step 7: Commit the changes to the database
+            db_connection.commit()
+            cursor.close()
+            
+            # Step 8: Return success message
+            return jsonify({"message": "Parking history data inserted successfully."}), 200
+        
+        else:
+            return jsonify({"error": "Database connection not available"}), 500
+    
+    except mysql.connector.Error as error:
+        # Step 9: Handle MySQL errors by calling a custom error handler
+        return handle_mysql_error(error)
 
 ## show the all the records of table 'datawatch'
 @app.route('/field', methods=['GET'])
@@ -1149,8 +1323,8 @@ def add_user():
         data = request.get_json()
 
         # Validate the required fields
-        if "name" not in data or "password_hash" not in data:
-            return jsonify({"error": "Both 'name' and 'password_hash' are required fields."}), 400
+        if "name" not in data or "password_hash" not in data or "email" not in data or "rfid" not in data or "assignedslot" not in data:
+            return jsonify({"error": "Fields 'name', 'password_hash', 'email', 'rfid', and 'assignedslot' are required."}), 400
         
         # Add validation for the 'role' field (if required)
         role = data.get("role", "")  # Default to empty string if not provided
@@ -1162,7 +1336,10 @@ def add_user():
         
         name = data["name"]
         password_hash = data["password_hash"]
-        
+        email = data["email"]
+        rfid = data["rfid"]
+        assignedslot = data["assignedslot"]
+
         # Get a database cursor
         cursor = get_cursor()
 
@@ -1177,12 +1354,12 @@ def add_user():
 
             # Prepare the SQL query to insert a new user into the 'users' table
             insert_sql = """
-            INSERT INTO users (name, password_hash, role, email, status, token, timestamp)
-            VALUES (%s, %s, %s, '', '', '', NOW());
+            INSERT INTO users (name, password_hash, role, email, status, token, rfid, assignedslot, timestamp)
+            VALUES (%s, %s, %s, %s, '', '', %s, %s, NOW());
             """
             
-            # Execute the insert query, including the role
-            cursor.execute(insert_sql, (name, password_hash, role))
+            # Execute the insert query, including the assignedslot if it's provided
+            cursor.execute(insert_sql, (name, password_hash, role, email, rfid, assignedslot))
             
             # Commit the changes to the database
             db_connection.commit()
@@ -1340,6 +1517,50 @@ def delete_user():
     
     except mysql.connector.Error as e:
         return handle_mysql_error(e)
+
+## show the all the records of table 'users'
+@app.route('/admin', methods=['GET'])
+def get_users_admin():
+    try:
+        # Check if MySQL is available
+        if not is_mysql_available():
+            return jsonify({"error": "MySQL database not responding, please check the database service"}), 500
+        
+        # Get a database cursor
+        cursor = get_cursor()
+        
+        if cursor:
+            # Execute the SQL query to fetch all users from the 'users' table
+            cursor.execute("SELECT * FROM users")
+            users = cursor.fetchall()
+            
+            # Prepare the list to return in JSON format
+            users_list = []
+            for user in users:
+                # Convert each user to a dictionary (assuming your table has id, name, etc. columns)
+                users_list.append({
+                    "id": user[0],
+                    "name": user[1],
+                    "password_hash": user[2],
+                    "role": user[3],
+                    "email": user[4],
+                    "status": user[5],
+                    "token": user[6],
+                    "timestamp": user[7]
+                })
+            
+            # Close the cursor
+            cursor.close()
+            
+            # Return the users as a JSON response
+            return jsonify({"users": users_list}), 200
+        
+        else:
+            return jsonify({"error": "Database connection not available"}), 500
+    
+    except mysql.connector.Error as e:
+        return handle_mysql_error(e)
+
 
 ## adding the new admin user
 @app.route('/admin/add', methods=['POST'])
@@ -1701,6 +1922,129 @@ def get_stores():
     except mysql.connector.Error as e:
         return handle_mysql_error(e)
 
+@app.route('/stores/add', methods=['POST'])
+def add_store_slot_column():
+    try:
+        # Get the data from the request body
+        data = request.get_json()
+
+        # Validate that 'unique_id' is provided
+        if "unique_id" not in data:
+            return jsonify({"error": "'unique_id' is required."}), 400
+
+        unique_id = data["unique_id"]
+
+        # Check if MySQL is available
+        if not is_mysql_available():
+            return jsonify({"error": "MySQL database not responding, please check the database service"}), 500
+
+        # Get a database cursor
+        cursor = get_cursor()
+
+        if cursor:
+            # Check if the store with the provided unique_id exists
+            cursor.execute("SELECT * FROM stores WHERE unique_id = %s", (unique_id,))
+            store = cursor.fetchone()
+
+            if not store:
+                cursor.close()
+                return jsonify({"error": f"Store with unique_id '{unique_id}' not found."}), 404
+
+            # Find the next available slot (next column like slot17, slot18, etc.)
+            # Get the column names for the stores table to find the last slot
+            cursor.execute("SHOW COLUMNS FROM stores")
+            columns = cursor.fetchall()
+
+            # Extract the column names
+            column_names = [column[0] for column in columns]
+
+            # Find the last slot (slotX) to determine the next available slot
+            slot_columns = [col for col in column_names if col.startswith('slot')]
+            slot_numbers = [int(col.replace('slot', '')) for col in slot_columns]
+            next_slot_number = max(slot_numbers, default=0) + 1  # Next available slot number
+
+            # Add a new column for the new slot
+            new_column_name = f"slot{next_slot_number}"
+            add_column_sql = f"ALTER TABLE stores ADD COLUMN {new_column_name} TEXT"
+            cursor.execute(add_column_sql)
+
+            # Commit the changes
+            db_connection.commit()
+
+            cursor.close()
+            return jsonify({"message": f"New column '{new_column_name}' added to the 'stores' table."}), 200
+
+        else:
+            return jsonify({"error": "Database connection not available"}), 500
+
+    except mysql.connector.Error as e:
+        return handle_mysql_error(e)
+
+@app.route('/stores/delete-column', methods=['DELETE'])
+def delete_store_column():
+    try:
+        # Get the data from the request body
+        data = request.get_json()
+
+        # Validate that 'unique_id' is provided
+        if "unique_id" not in data:
+            return jsonify({"error": "'unique_id' is required."}), 400
+
+        unique_id = data["unique_id"]
+
+        # Validate that 'column_name' is provided
+        if "column_name" not in data:
+            return jsonify({"error": "'column_name' is required."}), 400
+
+        column_name = data["column_name"]
+
+        # Ensure that 'unique_id' and 'slot1' cannot be deleted
+        if column_name in ["unique_id", "slot1"]:
+            return jsonify({"error": "'unique_id' and 'slot1' cannot be deleted."}), 400
+
+        # Check if MySQL is available
+        if not is_mysql_available():
+            return jsonify({"error": "MySQL database not responding, please check the database service"}), 500
+
+        # Get a database cursor
+        cursor = get_cursor()
+
+        if cursor:
+            # Check if the store with the provided unique_id exists
+            cursor.execute("SELECT * FROM stores WHERE unique_id = %s", (unique_id,))
+            store = cursor.fetchone()
+
+            if not store:
+                cursor.close()
+                return jsonify({"error": f"Store with unique_id '{unique_id}' not found."}), 404
+
+            # Check if the column exists in the stores table
+            cursor.execute("SHOW COLUMNS FROM stores")
+            columns = cursor.fetchall()
+
+            column_names = [column[0] for column in columns]
+
+            if column_name not in column_names:
+                cursor.close()
+                return jsonify({"error": f"Column '{column_name}' does not exist in the stores table."}), 404
+
+            # Drop the specified column
+            drop_column_sql = f"ALTER TABLE stores DROP COLUMN {column_name}"
+            cursor.execute(drop_column_sql)
+
+            # Commit the changes
+            db_connection.commit()
+            cursor.close()
+
+            return jsonify({"message": f"Column '{column_name}' has been deleted from the 'stores' table."}), 200
+
+        else:
+            return jsonify({"error": "Database connection not available"}), 500
+
+    except mysql.connector.Error as e:
+        return handle_mysql_error(e)
+
+
 ## adding the new profile
 @app.route('/profile/add', methods=['POST'])
 def insert_profile():
@@ -2034,6 +2378,50 @@ def get_violations():
     except mysql.connector.Error as e:
         return handle_mysql_error(e)
 
+@app.route('/violations-content', methods=['GET'])
+def violations_content():
+    try:
+        # Check if MySQL is available
+        if not is_mysql_available():
+            return jsonify({"error": "MySQL database not responding, please check the database service"}), 500
+
+        # Get a database cursor
+        cursor = get_cursor()
+
+        if cursor:
+            # SQL to retrieve all data from the 'violations' table
+            cursor.execute("SELECT * FROM violations")
+            violations = cursor.fetchall()
+
+            # If no data is found in the 'violations' table
+            if not violations:
+                cursor.close()
+                return jsonify({"message": "No violations found."}), 200
+
+            # Format the data as a list of dictionaries
+            violation_data = []
+            for violation in violations:
+                violation_data.append({
+                    "id": violation[0],
+                    "name": violation[1],
+                    "role": violation[2],
+                    "status": violation[3],
+                    "type": violation[4],
+                    "info": violation[5],
+                    "timestamp": violation[6].strftime('%Y-%m-%d %H:%M:%S')  # Format timestamp as a string
+                })
+
+            # Close the cursor
+            cursor.close()
+
+            return jsonify({"violations": violation_data}), 200
+
+        else:
+            return jsonify({"error": "Database connection not available"}), 500
+
+    except mysql.connector.Error as e:
+        return handle_mysql_error(e)
+
 @app.route('/violations/all', methods=['GET'])
 def get_all_violations():
     try:
@@ -2070,6 +2458,11 @@ def add_violation():
     try:
         # Get the data from the request body
         data = request.get_json()
+
+        # Check if MySQL is available
+        if not is_mysql_available():
+            return jsonify({"error": "MySQL database not responding, please check the database service"}), 500
+
 
         # Validate that required fields are provided
         required_fields = ["name", "role", "status", "type", "info"]
@@ -2114,6 +2507,51 @@ def add_violation():
             cursor.close()
 
             return jsonify({"message": "Violation record added successfully."}), 200
+
+        else:
+            return jsonify({"error": "Database connection not available"}), 500
+
+    except mysql.connector.Error as e:
+        return handle_mysql_error(e)
+
+@app.route('/violations/delete', methods=['DELETE'])
+def delete_violations():
+    try:
+        # Get the data from the request body
+        data = request.get_json()
+
+        # Validate that the 'name' field is provided
+        if "name" not in data:
+            return jsonify({"error": "'name' is required."}), 400
+
+        name = data["name"]
+        status = data.get("status")  # Status is optional
+
+        # Check if the 'violations' table exists
+        cursor = get_cursor()
+
+        if cursor:
+            # Build the delete query
+            if status:
+                # If 'status' is provided, delete violations where both 'name' and 'status' match
+                delete_sql = "DELETE FROM violations WHERE name = %s AND status = %s"
+                cursor.execute(delete_sql, (name, status))
+            else:
+                # If 'status' is not provided, delete violations where only 'name' matches
+                delete_sql = "DELETE FROM violations WHERE name = %s"
+                cursor.execute(delete_sql, (name,))
+
+            # Commit the changes to the database
+            db_connection.commit()
+
+            # Get the number of rows affected
+            rows_affected = cursor.rowcount
+            cursor.close()
+
+            if rows_affected > 0:
+                return jsonify({"message": f"{rows_affected} violation(s) deleted successfully."}), 200
+            else:
+                return jsonify({"message": "No violations found matching the criteria."}), 404
 
         else:
             return jsonify({"error": "Database connection not available"}), 500
@@ -2276,23 +2714,207 @@ def get_all_notifications():
     except mysql.connector.Error as e:
         return handle_mysql_error(e)
 
+@app.route('/parking-history', methods=['GET'])
+def get_parking_history():
+    try:
+        # Get the query parameters
+        sort = request.args.get('sort', default=None, type=str)
+        status = request.args.get('status', default=None, type=str)
+        limit = request.args.get('limit', default=None, type=str)
 
-@app.route('/', methods=['GET'])
-def index():
-    if is_mysql_available():
-        return jsonify({
-            "message": {
-                "status": "ok",
-                "developer": "kayven",
-                "email": "yvendee2020@gmail.com"
-            }
-        })
-    else:
-        return jsonify({"error": "MySQL database not responding, please check the database service"}), 500
+        # Check if MySQL is available
+        if not is_mysql_available():
+            return jsonify({"error": "MySQL database not responding, please check the database service"}), 500
 
-# @app.route('/', methods=['GET'])
-# def index():
-#     return jsonify({"message": "Welcome to the appfinity API"})
+        # Get a database cursor
+        cursor = get_cursor()
+
+        if cursor:
+            # Start building the SQL query
+            query = "SELECT * FROM parking_history"
+            conditions = []
+            order_by = None
+            limit_clause = None
+
+            # Handle the sorting
+            if sort == "latest":
+                order_by = "ORDER BY timestamp DESC"
+            elif sort == "old":
+                order_by = "ORDER BY timestamp ASC"
+
+            # Handle the status filtering
+            if status:
+                if status in ["active", "completed", "pending"]:  # Adjust status values based on your needs
+                    conditions.append(f"status = '{status}'")
+
+            # Handle the limit
+            if limit:
+                if limit == "all":
+                    limit_clause = ""
+                elif limit.isdigit() and int(limit) > 0:
+                    limit_clause = f"LIMIT {int(limit)}"
+                else:
+                    limit_clause = "LIMIT 10"  # Default to 10 if an invalid limit is given
+
+            # Combine conditions and order by clauses
+            if conditions:
+                query += " WHERE " + " AND ".join(conditions)
+
+            # Add order by and limit clauses if they exist
+            if order_by:
+                query += " " + order_by
+            if limit_clause:
+                query += " " + limit_clause
+
+            # Execute the query
+            cursor.execute(query)
+            parking_history = cursor.fetchall()
+
+            # Close the cursor
+            cursor.close()
+
+            # If no parking history found, return an empty list
+            if not parking_history:
+                return jsonify({"message": "No parking history found."}), 200
+
+            # Format the data as a list of dictionaries
+            history_data = []
+            for record in parking_history:
+                history_data.append({
+                    "id": record[0],
+                    "name": record[1],
+                    "role": record[2],
+                    "status": record[3],
+                    "type": record[4],
+                    "info": record[5],
+                    "slotname": record[6],
+                    "timestamp": record[7].strftime('%Y-%m-%d %H:%M:%S')  # Format timestamp as a string
+                })
+
+            # Return the result as JSON
+            return jsonify(history_data), 200
+
+        else:
+            return jsonify({"error": "Database connection not available"}), 500
+
+    except mysql.connector.Error as e:
+        return handle_mysql_error(e)
+
+@app.route('/parking-history/add', methods=['POST'])
+def add_parking_history():
+    try:
+        # Get the data from the request body
+        data = request.get_json()
+
+        # Check if MySQL is available
+        if not is_mysql_available():
+            return jsonify({"error": "MySQL database not responding, please check the database service"}), 500
+
+
+        # Validate the required fields
+        required_fields = ["name", "role", "status", "type", "info", "slotname"]
+        for field in required_fields:
+            if field not in data:
+                return jsonify({"error": f"'{field}' is required."}), 400
+
+        name = data["name"]
+        role = data["role"]
+        status = data["status"]
+        type = data["type"]
+        info = data["info"]
+        slotname = data["slotname"]
+
+        # Check if the 'parking_history' table exists
+        cursor = get_cursor()
+
+        if cursor:
+            # Insert the new record into the parking_history table
+            insert_sql = """
+            INSERT INTO parking_history (name, role, status, type, info, slotname)
+            VALUES (%s, %s, %s, %s, %s, %s)
+            """
+            cursor.execute(insert_sql, (name, role, status, type, info, slotname))
+
+            # Commit the changes to the database
+            db_connection.commit()
+            cursor.close()
+
+            return jsonify({"message": "Parking history added successfully."}), 200
+
+        else:
+            return jsonify({"error": "Database connection not available"}), 500
+
+    except mysql.connector.Error as e:
+        return handle_mysql_error(e)
+
+@app.route('/parking-history/<name>', methods=['GET'])
+def get_parking_history_by_name(name):
+    try:
+
+        # Check if MySQL is available
+        if not is_mysql_available():
+            return jsonify({"error": "MySQL database not responding, please check the database service"}), 500
+
+        # Check if the 'parking_history' table exists
+        cursor = get_cursor()
+
+        if cursor:
+            # Query the parking_history table to find records by name, ordered by timestamp (latest to oldest)
+            cursor.execute("""
+                SELECT id, name, role, status, type, info, slotname, timestamp 
+                FROM parking_history 
+                WHERE name = %s 
+                ORDER BY timestamp DESC
+            """, (name,))
+            parking_history = cursor.fetchall()
+
+            if parking_history:
+                # If records are found, return them as JSON
+                history_data = []
+                for record in parking_history:
+                    history_data.append({
+                        "id": record[0],
+                        "name": record[1],
+                        "role": record[2],
+                        "status": record[3],
+                        "type": record[4],
+                        "info": record[5],
+                        "slotname": record[6],
+                        "timestamp": record[7].strftime('%Y-%m-%d %H:%M:%S')  # Format timestamp
+                    })
+
+                cursor.close()
+                return jsonify(history_data), 200
+            else:
+                cursor.close()
+                return jsonify({"error": f"No parking history records found for '{name}'."}), 404
+        else:
+            return jsonify({"error": "Database connection not available"}), 500
+
+    except mysql.connector.Error as e:
+        return handle_mysql_error(e)
+
+
+# Check if the file "dev" exists
+if not os.path.exists('dev'):
+    # Execute this route if "dev" is not present and MySQL is available
+    @app.route('/', methods=['GET'])
+    def index():
+        if is_mysql_available():
+            return jsonify({
+                "message": {
+                    "status": "ok",
+                    "developer": "kayven",
+                    "email": "yvendee2020@gmail.com"
+                }
+            })
+        else:
+            return jsonify({"error": "MySQL database not responding, please check the database service"}), 500
+else:
+    # Execute this route if "dev" exists
+    @app.route('/', methods=['GET'])
+    def index():
+        return jsonify({"message": "Welcome to the appfinity API"})
 
 if __name__ == '__main__':
     app.run(debug=True)

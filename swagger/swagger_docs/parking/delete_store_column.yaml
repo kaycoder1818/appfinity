@@ -1,0 +1,64 @@
+/stores/delete-column:
+  delete:
+    summary: "Delete a Store Slot Column"
+    description: "Deletes a specified column from the 'stores' table. The column to be deleted is identified by 'column_name'. The 'unique_id' of the store must be provided, and certain columns like 'unique_id' and 'slot1' cannot be deleted."
+    tags: ["Stores"]
+    parameters:
+      - name: "body"
+        in: "body"
+        required: true
+        schema:
+          type: "object"
+          properties:
+            unique_id:
+              type: "string"
+              description: "The unique identifier of the store for which the column is to be deleted."
+              example: "store123"
+            column_name:
+              type: "string"
+              description: "The name of the column to delete from the store's table."
+              example: "slot17"
+          required:
+            - unique_id
+            - column_name
+    responses:
+      '200':
+        description: "Column deleted successfully from the 'stores' table"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                message:
+                  type: "string"
+                  example: "Column 'slot17' has been deleted from the 'stores' table."
+      '400':
+        description: "Bad Request if the required fields are missing or deletion is not allowed"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                error:
+                  type: "string"
+                  example: "'unique_id' and 'slot1' cannot be deleted."
+      '404':
+        description: "Store or column not found if no store matches the provided 'unique_id' or column does not exist"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                error:
+                  type: "string"
+                  example: "Store with unique_id 'store123' not found."
+      '500':
+        description: "Internal Server Error if there is an issue with the database or MySQL connection"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                error:
+                  type: "string"
+                  example: "MySQL database not responding, please check the database service"

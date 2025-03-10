@@ -1,0 +1,76 @@
+/parking-history/{name}:
+  get:
+    summary: "Retrieve Parking History by Name"
+    description: "Fetches the parking history records from the 'parking_history' table by the given 'name'. Returns parking history details such as id, role, status, type, info, slotname, and timestamp."
+    tags: ["Parking History"]
+    parameters:
+      - name: "name"
+        in: "path"
+        required: true
+        schema:
+          type: "string"
+          description: "The name associated with the parking history records to retrieve."
+          example: "testuser"
+    responses:
+      '200':
+        description: "Successfully retrieved parking history details"
+        content:
+          application/json:
+            schema:
+              type: "array"
+              items:
+                type: "object"
+                properties:
+                  id:
+                    type: "integer"
+                    description: "The unique ID of the parking history record."
+                    example: 1
+                  name:
+                    type: "string"
+                    description: "The name associated with the parking history record."
+                    example: "testuser"
+                  role:
+                    type: "string"
+                    description: "The role associated with the parking history record."
+                    example: "admin"
+                  status:
+                    type: "string"
+                    description: "The status of the parking history record."
+                    example: "active"
+                  type:
+                    type: "string"
+                    description: "The type of the parking history record."
+                    example: "indoor"
+                  info:
+                    type: "string"
+                    description: "Additional information about the parking history record."
+                    example: "No issues encountered."
+                  slotname:
+                    type: "string"
+                    description: "The parking slot name."
+                    example: "A1"
+                  timestamp:
+                    type: "string"
+                    format: "date-time"
+                    description: "The timestamp when the parking history was created."
+                    example: "2025-03-01T12:30:45Z"
+      '404':
+        description: "Parking history not found if no records match the provided 'name'"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                error:
+                  type: "string"
+                  example: "No parking history records found for 'testuser'."
+      '500':
+        description: "Internal Server Error if there is an issue with the database or MySQL connection"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                error:
+                  type: "string"
+                  example: "MySQL database not responding, please check the database service"

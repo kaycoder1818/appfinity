@@ -1,0 +1,63 @@
+/violations/delete:
+  delete:
+    summary: "Delete Violations"
+    description: "Deletes violations from the 'violations' table based on the provided 'name' and optional 'status'. If 'status' is provided, only violations matching both 'name' and 'status' are deleted."
+    tags: ["Violations"]
+    parameters:
+      - name: "body"
+        in: "body"
+        required: true
+        schema:
+          type: "object"
+          properties:
+            name:
+              type: "string"
+              description: "The name of the person or entity associated with the violation(s)."
+              example: "testuser"
+            status:
+              type: "string"
+              description: "The status of the violation (optional). If provided, only violations with this status will be deleted."
+              example: "resolved"
+          required:
+            - name
+    responses:
+      '200':
+        description: "Violations deleted successfully"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                message:
+                  type: "string"
+                  example: "1 violation(s) deleted successfully."
+      '400':
+        description: "Bad Request if required 'name' field is missing"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                error:
+                  type: "string"
+                  example: "'name' is required."
+      '404':
+        description: "Not Found if no violations match the criteria"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                message:
+                  type: "string"
+                  example: "No violations found matching the criteria."
+      '500':
+        description: "Internal Server Error if there is an issue with the database or MySQL connection"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                error:
+                  type: "string"
+                  example: "MySQL database not responding, please check the database service"

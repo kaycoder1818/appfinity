@@ -1,0 +1,74 @@
+/parking-history/add:
+  post:
+    summary: "Add a New Parking History"
+    description: "Inserts a new parking history record into the 'parking_history' table with required fields such as 'name', 'role', 'status', 'type', 'info', and 'slotname'."
+    tags: ["Parking History"]
+    parameters:
+      - name: "body"
+        in: "body"
+        required: true
+        schema:
+          type: "object"
+          properties:
+            name:
+              type: "string"
+              description: "The name associated with the parking history record."
+              example: "testuser"
+            role:
+              type: "string"
+              description: "The role associated with the parking history record."
+              example: "user"
+            status:
+              type: "string"
+              description: "The status of the parking record (e.g., 'active', 'completed')."
+              example: "active"
+            type:
+              type: "string"
+              description: "The type of the parking record (e.g., 'indoor', 'outdoor')."
+              example: "indoor"
+            info:
+              type: "string"
+              description: "Additional information about the parking history."
+              example: "No issues encountered."
+            slotname:
+              type: "string"
+              description: "The name of the parking slot."
+              example: "slot1"
+          required:
+            - name
+            - role
+            - status
+            - type
+            - info
+            - slotname
+    responses:
+      '200':
+        description: "Parking history added successfully"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                message:
+                  type: "string"
+                  example: "Parking history added successfully."
+      '400':
+        description: "Bad Request if required fields are missing"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                error:
+                  type: "string"
+                  example: "'name', 'role', 'status', 'type', 'info', and 'slotname' are required fields."
+      '500':
+        description: "Internal Server Error if there is an issue with the database or MySQL connection"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                error:
+                  type: "string"
+                  example: "MySQL database not responding, please check the database service"
