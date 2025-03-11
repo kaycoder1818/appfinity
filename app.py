@@ -798,7 +798,6 @@ def insert_users():
         print(f"Database error: {e}")
         return jsonify({"error": "MySQL database operation failed. Please check the database connection."}), 500
 
-
 ## insert the initial records for stores
 @app.route('/insert-data-to-stores', methods=['GET'])
 def insert_stores():
@@ -1635,7 +1634,6 @@ def add_admin_user():
     except mysql.connector.Error as e:
         return handle_mysql_error(e)
 
-
 ## validate the admin user
 @app.route('/admin/login', methods=['POST'])
 def admin_login():
@@ -2055,7 +2053,6 @@ def delete_store_column():
 
     except mysql.connector.Error as e:
         return handle_mysql_error(e)
-
 
 ## adding the new profile
 @app.route('/profile/add', methods=['POST'])
@@ -2571,7 +2568,6 @@ def delete_violations():
     except mysql.connector.Error as e:
         return handle_mysql_error(e)
 
-
 @app.route('/notifications', methods=['GET'])
 def get_notifications():
     try:
@@ -2809,6 +2805,49 @@ def get_parking_history():
         else:
             return jsonify({"error": "Database connection not available"}), 500
 
+    except mysql.connector.Error as e:
+        return handle_mysql_error(e)
+
+## show all the records of the 'parking_history' table
+@app.route('/parking-history-content', methods=['GET'])
+def get_parking_history():
+    try:
+        # Check if MySQL is available
+        if not is_mysql_available():
+            return jsonify({"error": "MySQL database not responding, please check the database service"}), 500
+        
+        # Get a database cursor
+        cursor = get_cursor()
+        
+        if cursor:
+            # Execute the SQL query to fetch all records from the 'parking_history' table
+            cursor.execute("SELECT * FROM parking_history")
+            records = cursor.fetchall()
+            
+            # Prepare the list to return in JSON format
+            parking_history_list = []
+            for record in records:
+                # Convert each record to a dictionary (adjust the keys as per your table structure)
+                parking_history_list.append({
+                    "id": record[0],
+                    "name": record[1],
+                    "role": record[2],
+                    "status": record[3],
+                    "type": record[4],
+                    "info": record[5],
+                    "slotname": record[6],
+                    "timestamp": record[7]
+                })
+            
+            # Close the cursor
+            cursor.close()
+            
+            # Return the records as a JSON response
+            return jsonify({"parking_history": parking_history_list}), 200
+        
+        else:
+            return jsonify({"error": "Database connection not available"}), 500
+    
     except mysql.connector.Error as e:
         return handle_mysql_error(e)
 

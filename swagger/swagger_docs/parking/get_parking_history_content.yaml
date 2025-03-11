@@ -1,0 +1,61 @@
+/parking-history-content:
+  get:
+    summary: "Get Parking History Records"
+    description: "Fetches all records from the 'parking_history' table in the database and returns them in a structured format."
+    tags: ["Parking History"]
+    responses:
+      '200':
+        description: "Successfully retrieved parking history records"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                parking_history:
+                  type: "array"
+                  items:
+                    type: "object"
+                    properties:
+                      id:
+                        type: "integer"
+                        description: "The unique identifier for the record"
+                        example: 1
+                      name:
+                        type: "string"
+                        description: "The name of the user associated with the parking history"
+                        example: "testuser"
+                      role:
+                        type: "string"
+                        description: "The role of the user"
+                        example: "user"
+                      status:
+                        type: "string"
+                        description: "The status of the parking event"
+                        example: "completed"
+                      type:
+                        type: "string"
+                        description: "The type of parking event"
+                        example: "regular"
+                      info:
+                        type: "string"
+                        description: "Additional information about the parking event"
+                        example: "No issues"
+                      slotname:
+                        type: "string"
+                        description: "The parking slot associated with the event"
+                        example: "slot1"
+                      timestamp:
+                        type: "string"
+                        format: "date-time"
+                        description: "The timestamp when the parking event occurred"
+                        example: "2025-03-11T15:30:00Z"
+      '500':
+        description: "Internal Server Error if the MySQL database is not available"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                error:
+                  type: "string"
+                  example: "MySQL database not responding, please check the database service"
