@@ -2810,7 +2810,7 @@ def get_parking_history():
 
 ## show all the records of the 'parking_history' table
 @app.route('/parking-history-content', methods=['GET'])
-def get_parking_history():
+def get_parking_history_content():
     try:
         # Check if MySQL is available
         if not is_mysql_available():
