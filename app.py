@@ -1634,9 +1634,6 @@ def add_admin_user():
 
         # Generate a unique token 
         token = generate_random_string()
-
-        # Get the current timestamp
-        timestamp = datetime.now()
         
         # Set the role and status
         role = "admin"
@@ -1646,14 +1643,14 @@ def add_admin_user():
         cursor = get_cursor()
         
         if cursor:
-            # SQL to insert the new record
+            # SQL to insert the new record (using NOW() for timestamp)
             insert_user_sql = """
             INSERT INTO users (name, password_hash, role, email, status, token, timestamp)
-            VALUES (%s, %s, %s, %s, %s, %s, %s);
+            VALUES (%s, %s, %s, %s, %s, %s, NOW());
             """
             
             # Execute the insert query with the data
-            cursor.execute(insert_user_sql, (name, password_hash, role, email, status, token, timestamp))
+            cursor.execute(insert_user_sql, (name, password_hash, role, email, status, token))
             
             # Commit the transaction
             db_connection.commit()
@@ -1664,8 +1661,7 @@ def add_admin_user():
                 "message": "Admin User added successfully",
                 "status": "ok",
                 "role": "admin",
-                "token": token,
-                "timestamp": timestamp.isoformat()
+                "token": token
             }), 200
         
         else:
