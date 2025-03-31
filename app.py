@@ -2945,6 +2945,14 @@ def get_parking_history_by_name(name):
     except mysql.connector.Error as e:
         return handle_mysql_error(e)
 
+# Route to reconnect to MySQL
+@app.route('/reconnect-mysql', methods=['GET'])
+def reconnect_mysql():
+    if reconnect_to_mysql():
+        return jsonify({"message": "Reconnected to MySQL successfully!"}), 200
+    else:
+        return jsonify({"error": "Failed to reconnect to MySQL."}), 500
+        
 
 # Check if the file "dev" exists
 if not os.path.exists('dev'):
