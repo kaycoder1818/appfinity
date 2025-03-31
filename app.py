@@ -1625,7 +1625,7 @@ def add_admin_user():
                 "status": "ok",
                 "role": "admin",
                 "token": token,
-                "timestamp": timestamp.isoformat()
+                "timestamp": timestamp
             }), 200
         
         else:
