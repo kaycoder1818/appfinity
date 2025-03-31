@@ -1596,7 +1596,7 @@ def add_admin_user():
         token = generate_random_string()
 
         # Get the current timestamp
-        # timestamp = datetime.now()
+        timestamp = datetime.now()
         
         # Set the role and status
         role = "admin"
@@ -1609,7 +1609,7 @@ def add_admin_user():
             # SQL to insert the new record
             insert_user_sql = """
             INSERT INTO users (name, password_hash, role, email, status, token, timestamp)
-            VALUES (%s, %s, %s, %s, %s, %s, NOW());
+            VALUES (%s, %s, %s, %s, %s, %s, %s);
             """
             
             # Execute the insert query with the data
@@ -1625,7 +1625,7 @@ def add_admin_user():
                 "status": "ok",
                 "role": "admin",
                 "token": token,
-                "timestamp": timestamp
+                "timestamp": timestamp.isoformat()
             }), 200
         
         else:
@@ -2952,7 +2952,7 @@ def reconnect_mysql():
         return jsonify({"message": "Reconnected to MySQL successfully!"}), 200
     else:
         return jsonify({"error": "Failed to reconnect to MySQL."}), 500
-        
+
 
 # Check if the file "dev" exists
 if not os.path.exists('dev'):
