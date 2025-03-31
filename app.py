@@ -1593,7 +1593,7 @@ def add_admin_user():
         email = data["email"]
 
         # Generate a unique token 
-        token = generate_random_token()
+        token = generate_random_string()
 
         # Get the current timestamp
         # timestamp = datetime.now()
