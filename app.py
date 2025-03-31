@@ -1596,7 +1596,7 @@ def add_admin_user():
         token = generate_random_token()
 
         # Get the current timestamp
-        timestamp = datetime.now()
+        # timestamp = datetime.now()
         
         # Set the role and status
         role = "admin"
@@ -1609,7 +1609,7 @@ def add_admin_user():
             # SQL to insert the new record
             insert_user_sql = """
             INSERT INTO users (name, password_hash, role, email, status, token, timestamp)
-            VALUES (%s, %s, %s, %s, %s, %s, %s);
+            VALUES (%s, %s, %s, %s, %s, %s, NOW());
             """
             
             # Execute the insert query with the data
