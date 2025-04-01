@@ -1364,8 +1364,9 @@ def update_slot_for_entry(rfid):
         if not is_mysql_available():
             return jsonify({"error": "MySQL database not responding, please check the database service"}), 500
         
-        # Get a database cursor
-        cursor = get_cursor()
+        # Get a database connection and cursor
+        connection = get_connection()  # Assuming get_connection() returns the MySQL connection object
+        cursor = connection.cursor()
 
         if cursor:
             # Step 1: Check if the RFID exists in the users table and fetch the assignedslot
@@ -1390,7 +1391,7 @@ def update_slot_for_entry(rfid):
                     if store_value[0] == 'available':
                         # Step 4: Update the slot value to 'taken'
                         cursor.execute(f"UPDATE stores SET {assignedslot} = 'taken' WHERE unique_id = '12345'")
-                        cursor.connection.commit()  # Commit the changes
+                        connection.commit()  # Commit the changes using the connection object
                         return jsonify({"message": f"{assignedslot} successfully updated to 'taken'."}), 200
                     else:
                         return jsonify({"error": f"{assignedslot} is already marked as '{store_value[0]}', cannot update."}), 400
@@ -1413,8 +1414,9 @@ def update_slot_for_exit(rfid):
         if not is_mysql_available():
             return jsonify({"error": "MySQL database not responding, please check the database service"}), 500
         
-        # Get a database cursor
-        cursor = get_cursor()
+        # Get a database connection and cursor
+        connection = get_connection()  # Assuming get_connection() is a function that returns the connection object
+        cursor = connection.cursor()
 
         if cursor:
             # Step 1: Check if the RFID exists in the users table and fetch the assignedslot
@@ -1439,7 +1441,7 @@ def update_slot_for_exit(rfid):
                     if store_value[0] == 'taken':
                         # Step 4: Update the slot value to 'available'
                         cursor.execute(f"UPDATE stores SET {assignedslot} = 'available' WHERE unique_id = '12345'")
-                        cursor.connection.commit()  # Commit the changes
+                        connection.commit()  # Commit the changes using the connection object
                         return jsonify({"message": f"{assignedslot} successfully updated to 'available'."}), 200
                     else:
                         return jsonify({"error": f"{assignedslot} is already marked as '{store_value[0]}', cannot update."}), 400
