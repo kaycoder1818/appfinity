@@ -1,0 +1,72 @@
+/check_rfid/{rfid}:
+  get:
+    summary: "Check RFID"
+    description: "Checks if the provided RFID exists in the 'users' table and retrieves associated store information based on the assigned slot."
+    tags: ["RFID"]
+    parameters:
+      - name: "rfid"
+        in: "path"
+        required: true
+        schema:
+          type: "string"
+          description: "The RFID of the user to check."
+          example: "1234567890"
+    responses:
+      '200':
+        description: "Successfully retrieved store information"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                assignedslot:
+                  type: "string"
+                  description: "The assigned slot from the users table."
+                  example: "A1"
+                store_id:
+                  type: "integer"
+                  description: "The unique ID of the store."
+                  example: 101
+                store_name:
+                  type: "string"
+                  description: "The name of the store."
+                  example: "Store ABC"
+                location:
+                  type: "string"
+                  description: "The location of the store."
+                  example: "Floor 1, Section A"
+                timestamp:
+                  type: "string"
+                  format: "date-time"
+                  description: "The timestamp when the store information was last updated."
+                  example: "2025-03-01T12:30:45Z"
+      '404':
+        description: "RFID not found in users table or store record not found"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                error:
+                  type: "string"
+                  example: "RFID not found in users table or store record with the assigned slot not found."
+      '400':
+        description: "Bad Request - Invalid data or missing required column in store record"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                error:
+                  type: "string"
+                  example: "Assignedslot column does not exist in the stores table."
+      '500':
+        description: "Internal Server Error due to MySQL or database issues"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                error:
+                  type: "string"
+                  example: "MySQL database operation failed. Please check the database connection."

@@ -1313,6 +1313,49 @@ def get_fieldvalue_by_name(name):
     except mysql.connector.Error as e:
         return handle_mysql_error(e)
 
+@app.route('/check_rfid/<rfid>', methods=['GET'])
+def check_rfid(rfid):
+    try:
+        # Check if MySQL is available
+        if not is_mysql_available():
+            return jsonify({"error": "MySQL database not responding, please check the database service"}), 500
+        
+        # Get a database cursor
+        cursor = get_cursor()
+
+        if cursor:
+            # Check if the RFID exists in the users table and fetch only the first matching record
+            cursor.execute("SELECT assignedslot FROM users WHERE rfid = %s LIMIT 1", (rfid,))
+            user = cursor.fetchone()
+
+            if user:
+                assignedslot = user[0]
+                
+                # Check if the assignedslot exists in the stores table
+                cursor.execute("SELECT * FROM stores WHERE assignedslot = %s", (assignedslot,))
+                store = cursor.fetchone()
+
+                if store:
+                    # Get all column names of the store record
+                    columns = [desc[0] for desc in cursor.description]
+                    
+                    if 'assignedslot' in columns:
+                        store_data = dict(zip(columns, store))
+                        return jsonify(store_data), 200
+                    else:
+                        return jsonify({"error": "Assignedslot column does not exist in the stores table."}), 400
+                else:
+                    return jsonify({"error": "Store record with the assignedslot not found."}), 404
+            else:
+                return jsonify({"error": "RFID not found in users table."}), 404
+
+        else:
+            return jsonify({"error": "Database connection not available"}), 500
+
+    except mysql.connector.Error as e:
+        print(f"Database error: {e}")
+        return jsonify({"error": "MySQL database operation failed. Please check the database connection."}), 500
+
 ## show the all the records of table 'users'
 @app.route('/users', methods=['GET'])
 def get_users():
