@@ -87,6 +87,19 @@ else:
     print("File 'dev' exists. Skipping MySQL connection setup.")
 
 
+def get_connection():
+    global db_connection
+    
+    if db_connection and db_connection.is_connected():
+        return db_connection  # Return the existing connection if it's valid
+    
+    # If there is no connection or it's invalid, try to reconnect
+    if reconnect_to_mysql():
+        return db_connection
+    else:
+        return None
+
+
 # Helper function to reconnect to MySQL
 def reconnect_to_mysql():
     global db_connection
@@ -1359,13 +1372,19 @@ def check_rfid(rfid):
 
 @app.route('/update_slot_for_entry/<rfid>', methods=['POST'])
 def update_slot_for_entry(rfid):
+    connection = None
+    cursor = None
     try:
         # Check if MySQL is available
         if not is_mysql_available():
             return jsonify({"error": "MySQL database not responding, please check the database service"}), 500
         
-        # Get a database cursor
-        cursor = get_cursor()
+        # Get a database connection and cursor
+        connection = get_connection()  # Get the MySQL connection
+        if connection is None:
+            return jsonify({"error": "Failed to connect to the database"}), 500
+        
+        cursor = connection.cursor()
 
         if cursor:
             # Step 1: Check if the RFID exists in the users table and fetch the assignedslot
@@ -1390,7 +1409,7 @@ def update_slot_for_entry(rfid):
                     if store_value[0] == 'available':
                         # Step 4: Update the slot value to 'taken'
                         cursor.execute(f"UPDATE stores SET {assignedslot} = 'taken' WHERE unique_id = '12345'")
-                        cursor.connection.commit()  # Commit the changes using the connection object
+                        connection.commit()  # Commit the changes using the connection object
                         return jsonify({"message": f"{assignedslot} successfully updated to 'taken'."}), 200
                     else:
                         return jsonify({"error": f"{assignedslot} is already marked as '{store_value[0]}', cannot update."}), 400
@@ -1405,6 +1424,13 @@ def update_slot_for_entry(rfid):
     except mysql.connector.Error as e:
         print(f"Database error: {e}")
         return jsonify({"error": "MySQL database operation failed. Please check the database connection."}), 500
+    
+    finally:
+        if cursor:
+            cursor.close()
+        if connection:
+            connection.close()
+
 
 @app.route('/update_slot_for_exit/<rfid>', methods=['POST'])
 def update_slot_for_exit(rfid):
