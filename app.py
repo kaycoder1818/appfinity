@@ -1431,16 +1431,21 @@ def update_slot_for_entry(rfid):
         if connection:
             connection.close()
 
-
 @app.route('/update_slot_for_exit/<rfid>', methods=['POST'])
 def update_slot_for_exit(rfid):
+    connection = None
+    cursor = None
     try:
         # Check if MySQL is available
         if not is_mysql_available():
             return jsonify({"error": "MySQL database not responding, please check the database service"}), 500
         
-        # Get a database cursor
-        cursor = get_cursor()
+        # Get a database connection and cursor
+        connection = get_connection()  # Get the MySQL connection
+        if connection is None:
+            return jsonify({"error": "Failed to connect to the database"}), 500
+        
+        cursor = connection.cursor()
 
         if cursor:
             # Step 1: Check if the RFID exists in the users table and fetch the assignedslot
@@ -1465,7 +1470,7 @@ def update_slot_for_exit(rfid):
                     if store_value[0] == 'taken':
                         # Step 4: Update the slot value to 'available' because the user is exiting
                         cursor.execute(f"UPDATE stores SET {assignedslot} = 'available' WHERE unique_id = '12345'")
-                        cursor.connection.commit()  # Commit the changes to the database
+                        connection.commit()  # Commit the changes to the database
                         return jsonify({"message": f"{assignedslot} successfully updated to 'available'."}), 200
                     else:
                         return jsonify({"error": f"{assignedslot} is already marked as '{store_value[0]}', cannot update."}), 400
@@ -1480,6 +1485,12 @@ def update_slot_for_exit(rfid):
     except mysql.connector.Error as e:
         print(f"Database error: {e}")
         return jsonify({"error": "MySQL database operation failed. Please check the database connection."}), 500
+    
+    finally:
+        if cursor:
+            cursor.close()
+        if connection:
+            connection.close()
 
 ## show the all the records of table 'users'
 @app.route('/users', methods=['GET'])
