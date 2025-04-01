@@ -1324,35 +1324,29 @@ def check_rfid(rfid):
         cursor = get_cursor()
 
         if cursor:
-            # Check if the 'assignedslot' column exists in the 'users' table
-            cursor.execute("SHOW COLUMNS FROM users")
-            columns = [column[0] for column in cursor.fetchall()]
-            
-            if 'assignedslot' not in columns:
-                return jsonify({"error": "The 'assignedslot' column does not exist in the users table."}), 400
-
-            # Check if the RFID exists in the users table and fetch only the first matching record
+            # Check if the RFID exists in the users table and fetch the assignedslot
             cursor.execute("SELECT assignedslot FROM users WHERE rfid = %s LIMIT 1", (rfid,))
             user = cursor.fetchone()
 
             if user:
                 assignedslot = user[0]
                 
-                # Check if the assignedslot exists in the stores table
-                cursor.execute("SELECT * FROM stores WHERE assignedslot = %s", (assignedslot,))
-                store = cursor.fetchone()
+                # Get columns of the stores table to check if 'assignedslot' exists
+                cursor.execute("SHOW COLUMNS FROM stores")
+                store_columns = [column[0] for column in cursor.fetchall()]
 
-                if store:
-                    # Get all column names of the store record
-                    columns = [desc[0] for desc in cursor.description]
-                    
-                    if 'assignedslot' in columns:
-                        store_data = dict(zip(columns, store))
-                        return jsonify(store_data), 200
-                    else:
-                        return jsonify({"error": "Assignedslot column does not exist in the stores table."}), 400
+                # Check if 'assignedslot' exists in the stores table
+                if 'assignedslot' not in store_columns:
+                    return jsonify({"error": "'assignedslot' column does not exist in the stores table."}), 400
+
+                # If assignedslot exists, fetch its value from the stores table
+                cursor.execute(f"SELECT {assignedslot} FROM stores LIMIT 1")  # Dynamically select based on assignedslot
+                store_value = cursor.fetchone()
+
+                if store_value:
+                    return jsonify({assignedslot: store_value[0]}), 200
                 else:
-                    return jsonify({"error": "Store record with the assignedslot not found."}), 404
+                    return jsonify({"error": f"No data found for column '{assignedslot}' in the stores table."}), 404
             else:
                 return jsonify({"error": "RFID not found in users table."}), 404
 
