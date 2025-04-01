@@ -1324,6 +1324,13 @@ def check_rfid(rfid):
         cursor = get_cursor()
 
         if cursor:
+            # Check if the 'assignedslot' column exists in the 'users' table
+            cursor.execute("SHOW COLUMNS FROM users")
+            columns = [column[0] for column in cursor.fetchall()]
+            
+            if 'assignedslot' not in columns:
+                return jsonify({"error": "The 'assignedslot' column does not exist in the users table."}), 400
+
             # Check if the RFID exists in the users table and fetch only the first matching record
             cursor.execute("SELECT assignedslot FROM users WHERE rfid = %s LIMIT 1", (rfid,))
             user = cursor.fetchone()
