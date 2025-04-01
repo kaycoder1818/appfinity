@@ -1417,28 +1417,27 @@ def update_slot_for_exit(rfid):
         cursor = get_cursor()
 
         if cursor:
-            # Check if the RFID exists in the users table and fetch the assignedslot
+            # Step 1: Check if the RFID exists in the users table and fetch the assignedslot
             cursor.execute("SELECT assignedslot FROM users WHERE rfid = %s LIMIT 1", (rfid,))
             user = cursor.fetchone()
 
             if user:
                 assignedslot = user[0]
                 
-                # Get the columns of the stores table
+                # Step 2: Check if the assignedslot column exists in the stores table
                 cursor.execute("SHOW COLUMNS FROM stores")
                 store_columns = [column[0] for column in cursor.fetchall()]
 
-                # Check if the assignedslot exists as a column in the stores table
                 if assignedslot not in store_columns:
                     return jsonify({"error": f"'{assignedslot}' column does not exist in the stores table."}), 400
 
-                # Now, using the hardcoded unique_id ('12345'), fetch the current value from the stores table
+                # Step 3: Now, using the hardcoded unique_id ('12345'), fetch the current value from the stores table
                 cursor.execute(f"SELECT {assignedslot} FROM stores WHERE unique_id = '12345' LIMIT 1")
                 store_value = cursor.fetchone()
 
                 if store_value:
                     if store_value[0] == 'taken':
-                        # Update the slot value to 'available' because the user is exiting
+                        # Step 4: Update the slot value to 'available' because the user is exiting
                         cursor.execute(f"UPDATE stores SET {assignedslot} = 'available' WHERE unique_id = '12345'")
                         cursor.connection.commit()  # Commit the changes to the database
                         return jsonify({"message": f"{assignedslot} successfully updated to 'available'."}), 200
