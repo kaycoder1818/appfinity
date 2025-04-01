@@ -1331,7 +1331,7 @@ def check_rfid(rfid):
             if user:
                 assignedslot = user[0]
                 
-                # Get the column names from the stores table
+                # Get the columns of the stores table
                 cursor.execute("SHOW COLUMNS FROM stores")
                 store_columns = [column[0] for column in cursor.fetchall()]
 
@@ -1339,8 +1339,8 @@ def check_rfid(rfid):
                 if assignedslot not in store_columns:
                     return jsonify({"error": f"'{assignedslot}' column does not exist in the stores table."}), 400
 
-                # If assignedslot exists, fetch its value from the stores table
-                cursor.execute(f"SELECT {assignedslot} FROM stores WHERE unique_id = %s LIMIT 1", (rfid,))
+                # Now, using the hardcoded unique_id ('12345'), fetch the value from the stores table
+                cursor.execute(f"SELECT {assignedslot} FROM stores WHERE unique_id = '12345' LIMIT 1")
                 store_value = cursor.fetchone()
 
                 if store_value:
