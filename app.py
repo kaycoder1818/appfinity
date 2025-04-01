@@ -1357,6 +1357,104 @@ def check_rfid(rfid):
         print(f"Database error: {e}")
         return jsonify({"error": "MySQL database operation failed. Please check the database connection."}), 500
 
+@app.route('/update_slot_for_entry/<rfid>', methods=['POST'])
+def update_slot_for_entry(rfid):
+    try:
+        # Check if MySQL is available
+        if not is_mysql_available():
+            return jsonify({"error": "MySQL database not responding, please check the database service"}), 500
+        
+        # Get a database cursor
+        cursor = get_cursor()
+
+        if cursor:
+            # Step 1: Check if the RFID exists in the users table and fetch the assignedslot
+            cursor.execute("SELECT assignedslot FROM users WHERE rfid = %s LIMIT 1", (rfid,))
+            user = cursor.fetchone()
+
+            if user:
+                assignedslot = user[0]
+                
+                # Step 2: Check if the assignedslot column exists in the stores table
+                cursor.execute("SHOW COLUMNS FROM stores")
+                store_columns = [column[0] for column in cursor.fetchall()]
+
+                if assignedslot not in store_columns:
+                    return jsonify({"error": f"'{assignedslot}' column does not exist in the stores table."}), 400
+
+                # Step 3: Check if the slot is available, then update it to 'taken'
+                cursor.execute(f"SELECT {assignedslot} FROM stores WHERE unique_id = '12345' LIMIT 1")
+                store_value = cursor.fetchone()
+
+                if store_value:
+                    if store_value[0] == 'available':
+                        # Step 4: Update the slot value to 'taken'
+                        cursor.execute(f"UPDATE stores SET {assignedslot} = 'taken' WHERE unique_id = '12345'")
+                        cursor.connection.commit()  # Commit the changes
+                        return jsonify({"message": f"{assignedslot} successfully updated to 'taken'."}), 200
+                    else:
+                        return jsonify({"error": f"{assignedslot} is already marked as '{store_value[0]}', cannot update."}), 400
+                else:
+                    return jsonify({"error": f"No data found for column '{assignedslot}' in the stores table."}), 404
+            else:
+                return jsonify({"error": "RFID not found in users table."}), 404
+
+        else:
+            return jsonify({"error": "Database connection not available"}), 500
+
+    except mysql.connector.Error as e:
+        print(f"Database error: {e}")
+        return jsonify({"error": "MySQL database operation failed. Please check the database connection."}), 500
+
+@app.route('/update_slot_for_exit/<rfid>', methods=['POST'])
+def update_slot_for_exit(rfid):
+    try:
+        # Check if MySQL is available
+        if not is_mysql_available():
+            return jsonify({"error": "MySQL database not responding, please check the database service"}), 500
+        
+        # Get a database cursor
+        cursor = get_cursor()
+
+        if cursor:
+            # Step 1: Check if the RFID exists in the users table and fetch the assignedslot
+            cursor.execute("SELECT assignedslot FROM users WHERE rfid = %s LIMIT 1", (rfid,))
+            user = cursor.fetchone()
+
+            if user:
+                assignedslot = user[0]
+                
+                # Step 2: Check if the assignedslot column exists in the stores table
+                cursor.execute("SHOW COLUMNS FROM stores")
+                store_columns = [column[0] for column in cursor.fetchall()]
+
+                if assignedslot not in store_columns:
+                    return jsonify({"error": f"'{assignedslot}' column does not exist in the stores table."}), 400
+
+                # Step 3: Check if the slot is taken, then update it to 'available'
+                cursor.execute(f"SELECT {assignedslot} FROM stores WHERE unique_id = '12345' LIMIT 1")
+                store_value = cursor.fetchone()
+
+                if store_value:
+                    if store_value[0] == 'taken':
+                        # Step 4: Update the slot value to 'available'
+                        cursor.execute(f"UPDATE stores SET {assignedslot} = 'available' WHERE unique_id = '12345'")
+                        cursor.connection.commit()  # Commit the changes
+                        return jsonify({"message": f"{assignedslot} successfully updated to 'available'."}), 200
+                    else:
+                        return jsonify({"error": f"{assignedslot} is already marked as '{store_value[0]}', cannot update."}), 400
+                else:
+                    return jsonify({"error": f"No data found for column '{assignedslot}' in the stores table."}), 404
+            else:
+                return jsonify({"error": "RFID not found in users table."}), 404
+
+        else:
+            return jsonify({"error": "Database connection not available"}), 500
+
+    except mysql.connector.Error as e:
+        print(f"Database error: {e}")
+        return jsonify({"error": "MySQL database operation failed. Please check the database connection."}), 500
+
 ## show the all the records of table 'users'
 @app.route('/users', methods=['GET'])
 def get_users():
