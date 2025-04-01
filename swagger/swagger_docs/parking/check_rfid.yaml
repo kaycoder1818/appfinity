@@ -10,7 +10,7 @@
         schema:
           type: "string"
           description: "The RFID of the user to check."
-          example: "1234567890"
+          example: "3572269568"
     responses:
       '200':
         description: "Successfully retrieved store information"
