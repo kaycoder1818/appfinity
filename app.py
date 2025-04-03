@@ -1625,6 +1625,50 @@ def add_user():
     except mysql.connector.Error as e:
         return handle_mysql_error(e)
 
+@app.route('/users/update_assignedslot', methods=['PUT'])
+def update_assignedslot():
+    try:
+        # Get data from request
+        data = request.get_json()
+        name = data.get("name")
+        assignedslot = data.get("assignedslot")
+        
+        if not name or not assignedslot:
+            return jsonify({"error": "Both 'name' and 'assignedslot' must be provided"}), 400
+        
+        # Check if MySQL is available
+        if not is_mysql_available():
+            return jsonify({"error": "MySQL database not responding, please check the database service"}), 500
+        
+        # Get a database connection and cursor
+        connection = get_connection()  # Get the MySQL connection
+        if connection is None:
+            return jsonify({"error": "Failed to connect to the database"}), 500
+        
+        cursor = connection.cursor()
+        
+        if cursor:
+            # Execute the SQL query to update the assignedslot based on the user's name
+            cursor.execute("UPDATE users SET assignedslot = %s WHERE name = %s", (assignedslot, name))
+            
+            # Commit the transaction
+            connection.commit()
+            
+            if cursor.rowcount == 0:
+                return jsonify({"error": "No user found with the given name"}), 404
+            
+            # Close the cursor
+            cursor.close()
+            
+            return jsonify({"message": "Assigned slot updated successfully"}), 200
+        
+        else:
+            return jsonify({"error": "Database connection not available"}), 500
+    
+    except mysql.connector.Error as e:
+        print(f"Database error: {e}")
+        return jsonify({"error": "MySQL database operation failed. Please check the database connection."}), 500
+
 ## name and password hash validation
 @app.route('/users/validate', methods=['POST'])
 def validate_user():
