@@ -1333,8 +1333,15 @@ def check_rfid(rfid):
         if not is_mysql_available():
             return jsonify({"error": "MySQL database not responding, please check the database service"}), 500
         
-        # Get a database cursor
-        cursor = get_cursor()
+        # # Get a database cursor
+        # cursor = get_cursor()
+
+        # Get a database connection and cursor
+        connection = get_connection()  # Get the MySQL connection
+        if connection is None:
+            return jsonify({"error": "Failed to connect to the database"}), 500
+        
+        cursor = connection.cursor()
 
         if cursor:
             # Check if the RFID exists in the users table and fetch the assignedslot
@@ -1500,8 +1507,15 @@ def get_users():
         if not is_mysql_available():
             return jsonify({"error": "MySQL database not responding, please check the database service"}), 500
         
-        # Get a database cursor
-        cursor = get_cursor()
+        # # Get a database cursor
+        # cursor = get_cursor()
+
+        # Get a database connection and cursor
+        connection = get_connection()  # Get the MySQL connection
+        if connection is None:
+            return jsonify({"error": "Failed to connect to the database"}), 500
+        
+        cursor = connection.cursor()
         
         if cursor:
             # Execute the SQL query to fetch all users from the 'users' table
@@ -1571,7 +1585,15 @@ def add_user():
         assignedslot = data["assignedslot"]
 
         # Get a database cursor
-        cursor = get_cursor()
+        # cursor = get_cursor()
+
+        
+        # Get a database connection and cursor
+        connection = get_connection()  # Get the MySQL connection
+        if connection is None:
+            return jsonify({"error": "Failed to connect to the database"}), 500
+        
+        cursor = connection.cursor()
 
         if cursor:
             # Check if the user with the same name already exists
@@ -1621,8 +1643,17 @@ def validate_user():
         name = data["name"]
         password_hash = data["password_hash"]
         
-        # Get a database cursor
-        cursor = get_cursor()
+        # # Get a database cursor
+        # cursor = get_cursor()
+
+        
+        # Get a database connection and cursor
+        connection = get_connection()  # Get the MySQL connection
+        if connection is None:
+            return jsonify({"error": "Failed to connect to the database"}), 500
+        
+        cursor = connection.cursor()
+
 
         if cursor:
             # Check if the user exists with the provided name
@@ -1671,8 +1702,16 @@ def update_password():
         name = data["name"]
         new_password_hash = data["password_hash"]
         
-        # Get a database cursor
-        cursor = get_cursor()
+        # # Get a database cursor
+        # cursor = get_cursor()
+
+        
+        # Get a database connection and cursor
+        connection = get_connection()  # Get the MySQL connection
+        if connection is None:
+            return jsonify({"error": "Failed to connect to the database"}), 500
+        
+        cursor = connection.cursor()
 
         if cursor:
             # Check if the user exists with the provided name
@@ -1719,7 +1758,15 @@ def delete_user():
         name = data["name"]
         
         # Get a database cursor
-        cursor = get_cursor()
+        # cursor = get_cursor()
+
+
+        # Get a database connection and cursor
+        connection = get_connection()  # Get the MySQL connection
+        if connection is None:
+            return jsonify({"error": "Failed to connect to the database"}), 500
+        
+        cursor = connection.cursor()
 
         if cursor:
             # Check if the user exists with the provided name
@@ -1757,7 +1804,15 @@ def get_users_admin():
             return jsonify({"error": "MySQL database not responding, please check the database service"}), 500
         
         # Get a database cursor
-        cursor = get_cursor()
+        # cursor = get_cursor()
+
+
+        # Get a database connection and cursor
+        connection = get_connection()  # Get the MySQL connection
+        if connection is None:
+            return jsonify({"error": "Failed to connect to the database"}), 500
+        
+        cursor = connection.cursor()
         
         if cursor:
             # Execute the SQL query to fetch all users from the 'users' table
@@ -1819,7 +1874,16 @@ def add_admin_user():
         status = "inactive"
         
         # Get a database cursor
-        cursor = get_cursor()
+        # cursor = get_cursor()
+
+
+
+        # Get a database connection and cursor
+        connection = get_connection()  # Get the MySQL connection
+        if connection is None:
+            return jsonify({"error": "Failed to connect to the database"}), 500
+        
+        cursor = connection.cursor()
         
         if cursor:
             # SQL to insert the new record (using NOW() for timestamp)
@@ -1864,7 +1928,17 @@ def admin_login():
         password_hash = data["password_hash"]
         
         # Get a database cursor
-        cursor = get_cursor()
+        # cursor = get_cursor()
+
+
+
+        # Get a database connection and cursor
+        connection = get_connection()  # Get the MySQL connection
+        if connection is None:
+            return jsonify({"error": "Failed to connect to the database"}), 500
+        
+        cursor = connection.cursor()
+
         
         if cursor:
             # SQL query to find the first user with the given name, password_hash, and role "admin"
@@ -1913,7 +1987,14 @@ def admin_delete():
         password_hash = data["password_hash"]
         
         # Get a database cursor
-        cursor = get_cursor()
+        # cursor = get_cursor()
+
+        # Get a database connection and cursor
+        connection = get_connection()  # Get the MySQL connection
+        if connection is None:
+            return jsonify({"error": "Failed to connect to the database"}), 500
+        
+        cursor = connection.cursor()
         
         if cursor:
             # SQL query to check for a user with the given name, password_hash, and role "admin"
@@ -1967,7 +2048,16 @@ def admin_update_profile():
         phone_number = data["phone_number"]
 
         # Check if the 'profile' table exists
-        cursor = get_cursor()
+        # cursor = get_cursor()
+
+
+        # Get a database connection and cursor
+        connection = get_connection()  # Get the MySQL connection
+        if connection is None:
+            return jsonify({"error": "Failed to connect to the database"}), 500
+        
+        cursor = connection.cursor()
+
 
         if cursor:
             # First, check if the profile exists and if the role is 'admin'
@@ -2011,7 +2101,16 @@ def admin_update_profile():
 def get_admin_profiles_contact():
     try:
         # Check if the 'profile' table exists
-        cursor = get_cursor()
+        # cursor = get_cursor()
+
+
+        # Get a database connection and cursor
+        connection = get_connection()  # Get the MySQL connection
+        if connection is None:
+            return jsonify({"error": "Failed to connect to the database"}), 500
+        
+        cursor = connection.cursor()
+
 
         if cursor:
             # Query to fetch all admin profiles from the 'profile' table
@@ -2077,7 +2176,15 @@ def update_store_slot():
             return jsonify({"error": f"Invalid slot name. Valid slots are: {', '.join(valid_slots)}."}), 400
         
         # Get a database cursor
-        cursor = get_cursor()
+        # cursor = get_cursor()
+
+        # Get a database connection and cursor
+        connection = get_connection()  # Get the MySQL connection
+        if connection is None:
+            return jsonify({"error": "Failed to connect to the database"}), 500
+        
+        cursor = connection.cursor()
+
 
         if cursor:
             # Check if the store with the given unique_id exists
@@ -2119,7 +2226,13 @@ def get_stores():
             return jsonify({"error": "MySQL database not responding, please check the database service"}), 500
 
         # Get a database cursor
-        cursor = get_cursor()
+        # cursor = get_cursor()
+        # Get a database connection and cursor
+        connection = get_connection()  # Get the MySQL connection
+        if connection is None:
+            return jsonify({"error": "Failed to connect to the database"}), 500
+        
+        cursor = connection.cursor()
 
         if cursor:
             # Query all records from the stores table
@@ -2164,7 +2277,14 @@ def add_store_slot_column():
             return jsonify({"error": "MySQL database not responding, please check the database service"}), 500
 
         # Get a database cursor
-        cursor = get_cursor()
+        # cursor = get_cursor()
+
+        # Get a database connection and cursor
+        connection = get_connection()  # Get the MySQL connection
+        if connection is None:
+            return jsonify({"error": "Failed to connect to the database"}), 500
+        
+        cursor = connection.cursor()
 
         if cursor:
             # Check if the store with the provided unique_id exists
@@ -2232,7 +2352,15 @@ def delete_store_column():
             return jsonify({"error": "MySQL database not responding, please check the database service"}), 500
 
         # Get a database cursor
-        cursor = get_cursor()
+        # cursor = get_cursor()
+
+        # Get a database connection and cursor
+        connection = get_connection()  # Get the MySQL connection
+        if connection is None:
+            return jsonify({"error": "Failed to connect to the database"}), 500
+        
+        cursor = connection.cursor()
+
 
         if cursor:
             # Check if the store with the provided unique_id exists
@@ -2286,7 +2414,15 @@ def insert_profile():
         full_name = data["full_name"]
 
         # Check if the 'profile' table exists
-        cursor = get_cursor()
+        # cursor = get_cursor()
+
+        # Get a database connection and cursor
+        connection = get_connection()  # Get the MySQL connection
+        if connection is None:
+            return jsonify({"error": "Failed to connect to the database"}), 500
+        
+        cursor = connection.cursor()
+
 
         if cursor:
             # Check if the given 'name' or 'full_name' already exists in the profile table
@@ -2338,7 +2474,15 @@ def update_profile():
                 return jsonify({"error": f"'{field}' cannot be empty."}), 400
 
         # Check if the 'profile' table exists
-        cursor = get_cursor()
+        # cursor = get_cursor()
+
+        # Get a database connection and cursor
+        connection = get_connection()  # Get the MySQL connection
+        if connection is None:
+            return jsonify({"error": "Failed to connect to the database"}), 500
+        
+        cursor = connection.cursor()
+
 
         if cursor:
             # SQL to update the profile fields
@@ -2399,7 +2543,15 @@ def update_profile():
 def get_profile_by_name(name):
     try:
         # Check if the 'profile' table exists
-        cursor = get_cursor()
+        # cursor = get_cursor()
+
+        # Get a database connection and cursor
+        connection = get_connection()  # Get the MySQL connection
+        if connection is None:
+            return jsonify({"error": "Failed to connect to the database"}), 500
+        
+        cursor = connection.cursor()
+
 
         if cursor:
             # Query the profile table to find the profile by name, including the new fields
@@ -2442,7 +2594,14 @@ def get_profile_by_name(name):
 def get_all_profiles():
     try:
         # Check if the 'profile' table exists
-        cursor = get_cursor()
+        # cursor = get_cursor()
+
+        # Get a database connection and cursor
+        connection = get_connection()  # Get the MySQL connection
+        if connection is None:
+            return jsonify({"error": "Failed to connect to the database"}), 500
+        
+        cursor = connection.cursor()
 
         if cursor:
             # Query to fetch all profiles from the 'profile' table, including the new fields
@@ -2496,7 +2655,15 @@ def delete_profile():
             return jsonify({"error": "'name' or 'full_name' is required to delete a profile."}), 400
 
         # Check if the 'profile' table exists
-        cursor = get_cursor()
+        # cursor = get_cursor()
+
+        # Get a database connection and cursor
+        connection = get_connection()  # Get the MySQL connection
+        if connection is None:
+            return jsonify({"error": "Failed to connect to the database"}), 500
+        
+        cursor = connection.cursor()
+
 
         if cursor:
             # Determine which column to use for deletion: 'name' or 'full_name'
@@ -2543,7 +2710,15 @@ def get_violations():
             return jsonify({"error": "MySQL database not responding, please check the database service"}), 500
 
         # Get a database cursor
-        cursor = get_cursor()
+        # cursor = get_cursor()
+
+        # Get a database connection and cursor
+        connection = get_connection()  # Get the MySQL connection
+        if connection is None:
+            return jsonify({"error": "Failed to connect to the database"}), 500
+        
+        cursor = connection.cursor()
+
 
         if cursor:
             # Start building the SQL query
@@ -2610,7 +2785,15 @@ def violations_content():
             return jsonify({"error": "MySQL database not responding, please check the database service"}), 500
 
         # Get a database cursor
-        cursor = get_cursor()
+        # cursor = get_cursor()
+
+        # Get a database connection and cursor
+        connection = get_connection()  # Get the MySQL connection
+        if connection is None:
+            return jsonify({"error": "Failed to connect to the database"}), 500
+        
+        cursor = connection.cursor()
+
 
         if cursor:
             # SQL to retrieve all data from the 'violations' table
@@ -2654,7 +2837,14 @@ def get_all_violations():
             return jsonify({"error": "MySQL database not responding, please check the database service"}), 500
 
         # Get a database cursor
-        cursor = get_cursor()
+        # cursor = get_cursor()
+
+        # Get a database connection and cursor
+        connection = get_connection()  # Get the MySQL connection
+        if connection is None:
+            return jsonify({"error": "Failed to connect to the database"}), 500
+        
+        cursor = connection.cursor()
 
         if cursor:
             # SQL query to select all records from the 'violations' table
@@ -2687,7 +2877,6 @@ def add_violation():
         if not is_mysql_available():
             return jsonify({"error": "MySQL database not responding, please check the database service"}), 500
 
-
         # Validate that required fields are provided
         required_fields = ["name", "role", "status", "type", "info"]
         for field in required_fields:
@@ -2700,14 +2889,17 @@ def add_violation():
         status = data["status"]
         violation_type = data["type"]
         info = data["info"]
-        timestamp = "CURRENT_TIMESTAMP"  # Automatically set timestamp to current time
 
         # Check if MySQL is available
         if not is_mysql_available():
             return jsonify({"error": "MySQL database not responding, please check the database service"}), 500
 
-        # Get a database cursor
-        cursor = get_cursor()
+        # Get a database connection and cursor
+        connection = get_connection()  # Get the MySQL connection
+        if connection is None:
+            return jsonify({"error": "Failed to connect to the database"}), 500
+        
+        cursor = connection.cursor()
 
         if cursor:
             # Check if the violation name already exists
@@ -2717,17 +2909,17 @@ def add_violation():
             if name_exists:
                 return jsonify({"error": "Violation with this name already exists."}), 400
 
-            # SQL to insert the new violation record
+            # SQL to insert the new violation record (MySQL will handle the timestamp)
             insert_sql = """
-            INSERT INTO violations (name, role, status, type, info, timestamp)
-            VALUES (%s, %s, %s, %s, %s, %s);
+            INSERT INTO violations (name, role, status, type, info)
+            VALUES (%s, %s, %s, %s, %s);
             """
 
             # Execute the insertion
-            cursor.execute(insert_sql, (name, role, status, violation_type, info, timestamp))
+            cursor.execute(insert_sql, (name, role, status, violation_type, info))
 
             # Commit the changes to the database
-            db_connection.commit()
+            connection.commit()
             cursor.close()
 
             return jsonify({"message": "Violation record added successfully."}), 200
@@ -2752,7 +2944,15 @@ def delete_violations():
         status = data.get("status")  # Status is optional
 
         # Check if the 'violations' table exists
-        cursor = get_cursor()
+        # cursor = get_cursor()
+
+        # Get a database connection and cursor
+        connection = get_connection()  # Get the MySQL connection
+        if connection is None:
+            return jsonify({"error": "Failed to connect to the database"}), 500
+        
+        cursor = connection.cursor()
+
 
         if cursor:
             # Build the delete query
@@ -2796,7 +2996,14 @@ def get_notifications():
             return jsonify({"error": "MySQL database not responding, please check the database service"}), 500
 
         # Get a database cursor
-        cursor = get_cursor()
+        # cursor = get_cursor()
+
+        # Get a database connection and cursor
+        connection = get_connection()  # Get the MySQL connection
+        if connection is None:
+            return jsonify({"error": "Failed to connect to the database"}), 500
+        
+        cursor = connection.cursor()
 
         if cursor:
             # Start building the SQL query
@@ -2882,7 +3089,14 @@ def add_notification():
             return jsonify({"error": "MySQL database not responding, please check the database service"}), 500
 
         # Get a database cursor
-        cursor = get_cursor()
+        # cursor = get_cursor()
+
+        # Get a database connection and cursor
+        connection = get_connection()  # Get the MySQL connection
+        if connection is None:
+            return jsonify({"error": "Failed to connect to the database"}), 500
+        
+        cursor = connection.cursor()
 
         if cursor:
             # SQL to insert a new record into the notifications table
@@ -2914,7 +3128,14 @@ def get_all_notifications():
             return jsonify({"error": "MySQL database not responding, please check the database service"}), 500
 
         # Get a database cursor
-        cursor = get_cursor()
+        # cursor = get_cursor()
+
+        # Get a database connection and cursor
+        connection = get_connection()  # Get the MySQL connection
+        if connection is None:
+            return jsonify({"error": "Failed to connect to the database"}), 500
+        
+        cursor = connection.cursor()
 
         if cursor:
             # SQL query to select all records from the 'notifications' table
@@ -2950,7 +3171,14 @@ def get_parking_history():
             return jsonify({"error": "MySQL database not responding, please check the database service"}), 500
 
         # Get a database cursor
-        cursor = get_cursor()
+        # cursor = get_cursor()
+
+        # Get a database connection and cursor
+        connection = get_connection()  # Get the MySQL connection
+        if connection is None:
+            return jsonify({"error": "Failed to connect to the database"}), 500
+        
+        cursor = connection.cursor()
 
         if cursor:
             # Start building the SQL query
@@ -3032,7 +3260,15 @@ def get_parking_history_content():
             return jsonify({"error": "MySQL database not responding, please check the database service"}), 500
         
         # Get a database cursor
-        cursor = get_cursor()
+        # cursor = get_cursor()
+
+        # Get a database connection and cursor
+        connection = get_connection()  # Get the MySQL connection
+        if connection is None:
+            return jsonify({"error": "Failed to connect to the database"}), 500
+        
+        cursor = connection.cursor()
+
         
         if cursor:
             # Execute the SQL query to fetch all records from the 'parking_history' table
@@ -3091,7 +3327,15 @@ def add_parking_history():
         slotname = data["slotname"]
 
         # Check if the 'parking_history' table exists
-        cursor = get_cursor()
+        # cursor = get_cursor()
+
+        # Get a database connection and cursor
+        connection = get_connection()  # Get the MySQL connection
+        if connection is None:
+            return jsonify({"error": "Failed to connect to the database"}), 500
+        
+        cursor = connection.cursor()
+
 
         if cursor:
             # Insert the new record into the parking_history table
@@ -3122,7 +3366,14 @@ def get_parking_history_by_name(name):
             return jsonify({"error": "MySQL database not responding, please check the database service"}), 500
 
         # Check if the 'parking_history' table exists
-        cursor = get_cursor()
+        # cursor = get_cursor()
+
+        # Get a database connection and cursor
+        connection = get_connection()  # Get the MySQL connection
+        if connection is None:
+            return jsonify({"error": "Failed to connect to the database"}), 500
+        
+        cursor = connection.cursor()
 
         if cursor:
             # Query the parking_history table to find records by name, ordered by timestamp (latest to oldest)
