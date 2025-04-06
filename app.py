@@ -1728,6 +1728,61 @@ def validate_user():
     except mysql.connector.Error as e:
         return handle_mysql_error(e)
 
+
+@app.route('/users/validate-email', methods=['POST'])
+def validate_email():
+    try:
+        # Check if MySQL is available
+        if not is_mysql_available():
+            return jsonify({"error": "MySQL database not responding, please check the database service"}), 500
+        
+        # Get the JSON data from the request
+        data = request.get_json()
+
+        # Validate the required fields
+        if "email" not in data or "password_hash" not in data:
+            return jsonify({"error": "Both 'email' and 'password_hash' are required fields."}), 400
+        
+        email = data["email"]
+        password_hash = data["password_hash"]
+        
+        # Get a database connection and cursor
+        connection = get_connection()  # Get the MySQL connection
+        if connection is None:
+            return jsonify({"error": "Failed to connect to the database"}), 500
+        
+        cursor = connection.cursor()
+
+        if cursor:
+            # Check if the user exists with the provided email
+            cursor.execute("SELECT * FROM users WHERE email = %s", (email,))
+            user = cursor.fetchone()
+            
+            if user:
+                # User exists, check if the password_hash matches
+                stored_password_hash = user[2]  # Assuming password_hash is in the 3rd column
+                role = user[3]  # Assuming role is in the 4th column
+                
+                if password_hash == stored_password_hash:
+                    cursor.close()
+                    return jsonify({
+                        "message": "Match",
+                        "role": role
+                    }), 200
+                else:
+                    cursor.close()
+                    return jsonify({"error": "Password does not match."}), 400
+            else:
+                cursor.close()
+                return jsonify({"error": "User not found."}), 404
+        
+        else:
+            return jsonify({"error": "Database connection not available"}), 500
+    
+    except mysql.connector.Error as e:
+        return handle_mysql_error(e)
+
+
 ## update password_hash by name
 @app.route('/users/update-password/', methods=['PUT'])
 def update_password():

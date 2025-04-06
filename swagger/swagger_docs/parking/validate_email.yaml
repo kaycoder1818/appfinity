@@ -1,0 +1,67 @@
+/users/validate-email:
+  post:
+    summary: "Validate User Email and Password"
+    description: "Validates the 'email' and 'password_hash' of a user. If the user exists, it checks if the provided password matches the stored password hash."
+    tags: ["Users"]
+    parameters:
+      - name: "body"
+        in: "body"
+        required: true
+        schema:
+          type: "object"
+          properties:
+            email:
+              type: "string"
+              description: "The email of the user to validate."
+              example: "testuser@example.com"
+            password_hash:
+              type: "string"
+              description: "The hashed password to validate."
+              example: "$2b$12$VvE5xF9sT/qjCjWkHH1vE.VmTaEN8gNN8NoZNW5O0Nm2c8p2kzA0G"
+          required:
+            - email
+            - password_hash
+    responses:
+      '200':
+        description: "Successfully validated user, password matches"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                message:
+                  type: "string"
+                  example: "Match"
+                role:
+                  type: "string"
+                  example: "admin"
+      '400':
+        description: "Bad Request if password does not match or required fields are missing"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                error:
+                  type: "string"
+                  example: "Password does not match."
+      '404':
+        description: "User not found"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                error:
+                  type: "string"
+                  example: "User not found."
+      '500':
+        description: "Internal Server Error if there is an issue with the database or MySQL connection"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                error:
+                  type: "string"
+                  example: "MySQL database not responding, please check the database service"
