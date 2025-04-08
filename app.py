@@ -1669,6 +1669,62 @@ def update_assignedslot():
         print(f"Database error: {e}")
         return jsonify({"error": "MySQL database operation failed. Please check the database connection."}), 500
 
+@app.route('/users/update_rfid', methods=['PUT'])
+def update_rfid():
+    try:
+        # Check if MySQL is available
+        if not is_mysql_available():
+            return jsonify({"error": "MySQL database not responding, please check the database service"}), 500
+        
+        # Get the JSON data from the request
+        data = request.get_json()
+
+        # Validate the required fields
+        if "name" not in data or "rfid" not in data:
+            return jsonify({"error": "Fields 'name' and 'rfid' are required."}), 400
+        
+        name = data["name"]
+        rfid = data["rfid"]
+
+        # Get a database connection and cursor
+        connection = get_connection()  # Get the MySQL connection
+        if connection is None:
+            return jsonify({"error": "Failed to connect to the database"}), 500
+        
+        cursor = connection.cursor()
+
+        if cursor:
+            # Check if the user with the provided name exists
+            cursor.execute("SELECT COUNT(*) FROM users WHERE name = %s", (name,))
+            user_exists = cursor.fetchone()[0]
+            
+            if not user_exists:
+                cursor.close()
+                return jsonify({"error": f"User with name '{name}' does not exist."}), 404
+
+            # Prepare the SQL query to update the RFID for the user
+            update_sql = """
+            UPDATE users
+            SET rfid = %s
+            WHERE name = %s;
+            """
+            
+            # Execute the update query
+            cursor.execute(update_sql, (rfid, name))
+            
+            # Commit the changes to the database
+            connection.commit()
+            cursor.close()
+            
+            return jsonify({"message": f"RFID for user '{name}' updated successfully."}), 200
+        
+        else:
+            return jsonify({"error": "Database connection not available"}), 500
+    
+    except mysql.connector.Error as e:
+        return handle_mysql_error(e)
+
+
 ## name and password hash validation
 @app.route('/users/validate', methods=['POST'])
 def validate_user():
@@ -2270,7 +2326,8 @@ def update_store_slot():
         new_value = data["new_value"]
 
         # Validate if the slot name is valid (it should be one of the 'slot1' to 'slot16')
-        valid_slots = [f"slot{i}" for i in range(1, 17)]
+        # valid_slots = [f"slot{i}" for i in range(1, 17)]
+        valid_slots = [f"slot{i}" for i in range(1, 201)]
         if slot not in valid_slots:
             return jsonify({"error": f"Invalid slot name. Valid slots are: {', '.join(valid_slots)}."}), 400
         
@@ -3082,6 +3139,51 @@ def delete_violations():
     except mysql.connector.Error as e:
         return handle_mysql_error(e)
 
+@app.route('/violations/<name>', methods=['GET'])
+def get_violations_by_name(name):
+    try:
+        # Get a database connection and cursor
+        connection = get_connection()  # Get the MySQL connection
+        if connection is None:
+            return jsonify({"error": "Failed to connect to the database"}), 500
+        
+        cursor = connection.cursor()
+
+        if cursor:
+            # Query the violations table to find the violations by name, ordered by timestamp (latest to oldest)
+            cursor.execute("""
+                SELECT id, name, role, status, type, info, timestamp 
+                FROM violations 
+                WHERE name = %s
+                ORDER BY timestamp DESC
+            """, (name,))
+            violations = cursor.fetchall()
+
+            if violations:
+                # Prepare the list of violations with the correct columns
+                violation_data = []
+                for violation in violations:
+                    violation_data.append({
+                        "id": violation[0],
+                        "name": violation[1],
+                        "role": violation[2],
+                        "status": violation[3],
+                        "type": violation[4],
+                        "info": violation[5],
+                        "timestamp": violation[6].strftime('%Y-%m-%d %H:%M:%S')  # Format timestamp as a string
+                    })
+
+                cursor.close()
+                return jsonify(violation_data), 200
+            else:
+                cursor.close()
+                return jsonify({"error": f"No violations found for name '{name}'."}), 404
+        else:
+            return jsonify({"error": "Database connection not available"}), 500
+
+    except mysql.connector.Error as e:
+        return handle_mysql_error(e)
+
 @app.route('/notifications', methods=['GET'])
 def get_notifications():
     try:
@@ -3251,6 +3353,50 @@ def get_all_notifications():
             # Return the result as JSON
             return jsonify(notifications), 200
 
+        else:
+            return jsonify({"error": "Database connection not available"}), 500
+
+    except mysql.connector.Error as e:
+        return handle_mysql_error(e)
+
+@app.route('/notifications/<name>', methods=['GET'])
+def get_notifications_by_name(name):
+    try:
+        # Get a database connection and cursor
+        connection = get_connection()  # Get the MySQL connection
+        if connection is None:
+            return jsonify({"error": "Failed to connect to the database"}), 500
+        
+        cursor = connection.cursor()
+
+        if cursor:
+            # Query the notifications table to find notifications by uniqueId (name), ordered by timestamp (latest to oldest)
+            cursor.execute("""
+                SELECT id, uniqueId, role, status, message, timestamp 
+                FROM notifications 
+                WHERE uniqueId = %s
+                ORDER BY timestamp DESC
+            """, (name,))
+            notifications = cursor.fetchall()
+
+            if notifications:
+                # Prepare the list of notifications
+                notification_data = []
+                for notification in notifications:
+                    notification_data.append({
+                        "id": notification[0],
+                        "uniqueId": notification[1],
+                        "role": notification[2],
+                        "status": notification[3],
+                        "message": notification[4],
+                        "timestamp": notification[5].strftime('%a, %d %b %Y %H:%M:%S GMT')  # Format timestamp as in your example
+                    })
+
+                cursor.close()
+                return jsonify(notification_data), 200
+            else:
+                cursor.close()
+                return jsonify({"error": f"No notifications found for '{name}'."}), 404
         else:
             return jsonify({"error": "Database connection not available"}), 500
 

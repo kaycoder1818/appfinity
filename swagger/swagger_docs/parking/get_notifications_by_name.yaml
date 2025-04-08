@@ -1,0 +1,67 @@
+/notifications/{name}:
+  get:
+    summary: "Get Notifications by User Name"
+    description: "Retrieves all notifications for a specific user identified by their 'name' (uniqueId). Returns a list of notifications or an error if no notifications are found or if there is a database connection issue."
+    tags: ["Notifications"]
+    parameters:
+      - name: "name"
+        in: "path"
+        required: true
+        description: "The unique identifier (name) of the user whose notifications are being retrieved."
+        schema:
+          type: "string"
+          example: "testuser"
+    responses:
+      '200':
+        description: "A list of notifications for the user"
+        content:
+          application/json:
+            schema:
+              type: "array"
+              items:
+                type: "object"
+                properties:
+                  id:
+                    type: "integer"
+                    description: "The ID of the notification"
+                    example: 1
+                  uniqueId:
+                    type: "string"
+                    description: "The unique ID of the user"
+                    example: "testuser"
+                  role:
+                    type: "string"
+                    description: "The role of the user"
+                    example: "admin"
+                  status:
+                    type: "string"
+                    description: "The status of the notification"
+                    example: "unread"
+                  message:
+                    type: "string"
+                    description: "The content of the notification"
+                    example: "Your account has been updated."
+                  timestamp:
+                    type: "string"
+                    description: "The timestamp when the notification was created"
+                    example: "Tue, 08 Apr 2025 12:30:00 GMT"
+      '404':
+        description: "No notifications found for the given user name"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                error:
+                  type: "string"
+                  example: "No notifications found for 'testuser'."
+      '500':
+        description: "Internal Server Error if there is a MySQL issue or connection failure"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                error:
+                  type: "string"
+                  example: "MySQL database not responding, please check the database service"

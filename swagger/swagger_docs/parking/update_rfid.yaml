@@ -1,0 +1,64 @@
+/users/update_rfid:
+  put:
+    summary: "Update RFID for a User"
+    description: "Updates the RFID for a user identified by their 'name'. Both 'name' and 'rfid' are required. The request fails if either is missing or if the user is not found. Returns an error if the MySQL database is unavailable or if there is a connection failure."
+    tags: ["Users"]
+    parameters:
+      - name: "body"
+        in: "body"
+        required: true
+        schema:
+          type: "object"
+          properties:
+            name:
+              type: "string"
+              description: "The name of the user whose RFID is being updated."
+              example: "testuser"
+            rfid:
+              type: "string"
+              description: "The new RFID for the user."
+              example: "1234567890"
+          required:
+            - name
+            - rfid
+    responses:
+      '200':
+        description: "RFID successfully updated for the user"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                message:
+                  type: "string"
+                  example: "RFID for user 'testuser' updated successfully."
+      '400':
+        description: "Bad Request if 'name' or 'rfid' are missing"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                error:
+                  type: "string"
+                  example: "Fields 'name' and 'rfid' are required."
+      '404':
+        description: "Not Found if no user with the provided name exists"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                error:
+                  type: "string"
+                  example: "User with name 'testuser' does not exist."
+      '500':
+        description: "Internal Server Error if there is a MySQL issue or connection failure"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                error:
+                  type: "string"
+                  example: "MySQL database not responding, please check the database service"

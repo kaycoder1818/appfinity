@@ -1,0 +1,71 @@
+/violations/{name}:
+  get:
+    summary: "Get Violations by User Name"
+    description: "Retrieves all violations for a specific user identified by their 'name'. Returns a list of violation details or an error if no violations are found or if there is a database connection issue."
+    tags: ["Violations"]
+    parameters:
+      - name: "name"
+        in: "path"
+        required: true
+        description: "The name of the user whose violations are being retrieved."
+        schema:
+          type: "string"
+          example: "testuser"
+    responses:
+      '200':
+        description: "A list of violations for the user"
+        content:
+          application/json:
+            schema:
+              type: "array"
+              items:
+                type: "object"
+                properties:
+                  id:
+                    type: "integer"
+                    description: "The ID of the violation"
+                    example: 1
+                  name:
+                    type: "string"
+                    description: "The name of the user"
+                    example: "testuser"
+                  role:
+                    type: "string"
+                    description: "The role of the user"
+                    example: "admin"
+                  status:
+                    type: "string"
+                    description: "The status of the violation"
+                    example: "resolved"
+                  type:
+                    type: "string"
+                    description: "The type of the violation"
+                    example: "late check-in"
+                  info:
+                    type: "string"
+                    description: "Additional information about the violation"
+                    example: "User checked in after the allowed time"
+                  timestamp:
+                    type: "string"
+                    description: "The timestamp of the violation"
+                    example: "2025-04-08 12:30:00"
+      '404':
+        description: "No violations found for the given user name"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                error:
+                  type: "string"
+                  example: "No violations found for name 'testuser'."
+      '500':
+        description: "Internal Server Error if there is a MySQL issue or connection failure"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                error:
+                  type: "string"
+                  example: "MySQL database not responding, please check the database service"
