@@ -1,0 +1,44 @@
+/notifications/delete/{name}:
+  delete:
+    summary: "Delete Notifications by User Name"
+    description: "Deletes all notifications for a specific user identified by their 'name' (uniqueId). Returns a success message if notifications are deleted, or an error if no notifications are found or if there is a database connection issue."
+    tags: ["Notifications"]
+    parameters:
+      - name: "name"
+        in: "path"
+        required: true
+        description: "The unique identifier (name) of the user whose notifications are to be deleted."
+        schema:
+          type: "string"
+          example: "testuser"
+    responses:
+      '200':
+        description: "All notifications for the user were successfully deleted"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                message:
+                  type: "string"
+                  example: "All notifications for 'testuser' deleted successfully."
+      '404':
+        description: "No notifications found for the given user name to delete"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                message:
+                  type: "string"
+                  example: "No notifications found for 'testuser' to delete."
+      '500':
+        description: "Internal Server Error if there is a MySQL issue or connection failure"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                error:
+                  type: "string"
+                  example: "MySQL database not responding, please check the database service"

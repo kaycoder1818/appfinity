@@ -3321,6 +3321,39 @@ def add_notification():
     except mysql.connector.Error as e:
         return handle_mysql_error(e)
 
+@app.route('/notifications/delete/<name>', methods=['DELETE'])
+def delete_notifications_by_name(name):
+    try:
+        # Get a database connection and cursor
+        connection = get_connection()  # Get the MySQL connection
+        if connection is None:
+            return jsonify({"error": "Failed to connect to the database"}), 500
+        
+        cursor = connection.cursor()
+
+        if cursor:
+            # SQL query to delete all notifications for the given name (uniqueId)
+            cursor.execute("""
+                DELETE FROM notifications 
+                WHERE uniqueId = %s
+            """, (name,))
+
+            # Commit the changes to the database
+            connection.commit()
+
+            # Check how many records were deleted
+            if cursor.rowcount > 0:
+                cursor.close()
+                return jsonify({"message": f"All notifications for '{name}' deleted successfully."}), 200
+            else:
+                cursor.close()
+                return jsonify({"message": f"No notifications found for '{name}' to delete."}), 404
+        else:
+            return jsonify({"error": "Database connection not available"}), 500
+
+    except mysql.connector.Error as e:
+        return handle_mysql_error(e)
+
 @app.route('/notifications/all', methods=['GET'])
 def get_all_notifications():
     try:
