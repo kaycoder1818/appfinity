@@ -1,7 +1,7 @@
 /update_slot_for_entry/{rfid}:
   post:
-    summary: "Update Slot for Entry"
-    description: "Updates the assigned slot in the stores table to 'taken' for the specified RFID, after checking if the slot is available."
+    summary: "Update Slot for Entry by RFID"
+    description: "Assigns a user to the first available slot in the stores table based on their RFID, ensuring no conflicts with other assignments."
     tags: ["RFID"]
     parameters:
       - name: "rfid"
@@ -9,11 +9,11 @@
         required: true
         schema:
           type: "string"
-          description: "The RFID of the user whose assigned slot needs to be updated."
+          description: "The RFID of the user whose slot needs to be updated."
           example: "1234567890"
     responses:
       '200':
-        description: "Successfully updated the slot to 'taken'."
+        description: "Successfully updated the slot assignment."
         content:
           application/json:
             schema:
@@ -21,9 +21,9 @@
               properties:
                 message:
                   type: "string"
-                  example: "A1 successfully updated to 'taken'."
+                  example: "slot1 successfully updated to 'John Doe'."
       '400':
-        description: "Bad Request - Slot is already marked as taken or assignedslot does not exist."
+        description: "Bad Request - RFID not found, or no available slots."
         content:
           application/json:
             schema:
@@ -31,9 +31,9 @@
               properties:
                 error:
                   type: "string"
-                  example: "A1 is already marked as 'taken', cannot update."
+                  example: "User 'John Doe' is already assigned to a slot."
       '404':
-        description: "RFID not found in users table or slot not found in stores table."
+        description: "RFID not found in users table."
         content:
           application/json:
             schema:
@@ -41,9 +41,9 @@
               properties:
                 error:
                   type: "string"
-                  example: "RFID not found in users table or No data found for column 'A1' in the stores table."
+                  example: "RFID not found in users table."
       '500':
-        description: "Internal Server Error due to MySQL or database issues"
+        description: "Internal Server Error due to MySQL or database issues."
         content:
           application/json:
             schema:

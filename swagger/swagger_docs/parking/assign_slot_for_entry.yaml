@@ -1,7 +1,7 @@
-/update_slot_for_exit/{rfid}:
+/assign_slot_for_entry/{rfid}:
   post:
-    summary: "Update Slot for Exit by RFID"
-    description: "Updates the assigned slot to 'available' when a user with the given RFID exits the store, ensuring proper slot management."
+    summary: "Assign Slot for Entry"
+    description: "Updates the assigned slot in the stores table to 'taken' for the specified RFID, after checking if the slot is available."
     tags: ["RFID"]
     parameters:
       - name: "rfid"
@@ -9,11 +9,11 @@
         required: true
         schema:
           type: "string"
-          description: "The RFID of the user who is exiting, to update the assigned slot."
+          description: "The RFID of the user whose assigned slot needs to be updated."
           example: "1234567890"
     responses:
       '200':
-        description: "Successfully updated the assigned slot to 'available'."
+        description: "Successfully updated the slot to 'taken'."
         content:
           application/json:
             schema:
@@ -21,9 +21,9 @@
               properties:
                 message:
                   type: "string"
-                  example: "slot1 successfully updated to 'available'."
+                  example: "A1 successfully updated to 'taken'."
       '400':
-        description: "Bad Request - Invalid slot or the slot is already marked as 'available'."
+        description: "Bad Request - Slot is already marked as taken or assignedslot does not exist."
         content:
           application/json:
             schema:
@@ -31,7 +31,7 @@
               properties:
                 error:
                   type: "string"
-                  example: "'slot1' is already marked as 'available', cannot update."
+                  example: "A1 is already marked as 'taken', cannot update."
       '404':
         description: "RFID not found in users table or slot not found in stores table."
         content:
@@ -41,9 +41,9 @@
               properties:
                 error:
                   type: "string"
-                  example: "No data found for column 'slot1' in the stores table."
+                  example: "RFID not found in users table or No data found for column 'A1' in the stores table."
       '500':
-        description: "Internal Server Error due to MySQL or database issues."
+        description: "Internal Server Error due to MySQL or database issues"
         content:
           application/json:
             schema:
