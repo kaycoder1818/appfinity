@@ -1,0 +1,49 @@
+/message/delete-by-name:
+  post:
+    summary: "Delete Messages by Name"
+    description: "Deletes all messages from the 'message' table associated with the specified 'name'."
+    tags: ["Messages"]
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: "object"
+            properties:
+              name:
+                type: "string"
+                description: "The name associated with the messages to delete."
+                example: "testuser"
+            required:
+              - name
+    responses:
+      '200':
+        description: "Messages deleted successfully or no messages found"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                message:
+                  type: "string"
+                  example: "All messages for 'testuser' deleted successfully."
+      '400':
+        description: "Bad Request if 'name' is not provided"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                error:
+                  type: "string"
+                  example: "'name' is required to delete messages."
+      '500':
+        description: "Internal Server Error if there is an issue with the database or MySQL connection"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                error:
+                  type: "string"
+                  example: "MySQL database not responding, please check the database service"

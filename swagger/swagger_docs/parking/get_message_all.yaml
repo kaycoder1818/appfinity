@@ -1,0 +1,47 @@
+/messages/all:
+  get:
+    summary: "Get All Messages"
+    description: "Fetches all records from the 'message' table and returns them as a JSON list."
+    tags: ["Messages"]
+    responses:
+      '200':
+        description: "Successfully retrieved all messages or no messages found"
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - type: "array"
+                  items:
+                    type: "object"
+                    properties:
+                      id:
+                        type: "integer"
+                        example: 1
+                      sender:
+                        type: "string"
+                        example: "Alice"
+                      receiver:
+                        type: "string"
+                        example: "Bob"
+                      content:
+                        type: "string"
+                        example: "Hello, how are you?"
+                      timestamp:
+                        type: "string"
+                        format: "date-time"
+                        example: "2025-04-14T12:34:56Z"
+                - type: "object"
+                  properties:
+                    message:
+                      type: "string"
+                      example: "No messages found."
+      '500':
+        description: "Internal Server Error if there is an issue with the database or MySQL connection"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                error:
+                  type: "string"
+                  example: "MySQL database not responding, please check the database service"

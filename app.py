@@ -494,6 +494,48 @@ def create_table_parking_history():
     except mysql.connector.Error as e:
         return handle_mysql_error(e)
 
+@app.route('/create-table-message', methods=['GET'])
+def create_table_message():
+    try:
+        # Check if MySQL is available
+        if not is_mysql_available():
+            return jsonify({"error": "MySQL database not responding, please check the database service"}), 500
+
+        # Get a database cursor
+        cursor = get_cursor()
+
+        if cursor:
+            # SQL to create the 'message' table with the specified columns
+            create_table_sql = """
+            CREATE TABLE IF NOT EXISTS message (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                name TEXT,
+                status TEXT,
+                type TEXT,
+                `group` TEXT,
+                sender TEXT,
+                receiver TEXT,
+                message TEXT,
+                timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+            );
+            """
+
+            # Execute the create table query
+            cursor.execute(create_table_sql)
+
+            # Commit the changes to the database
+            db_connection.commit()
+            cursor.close()
+
+            return jsonify({"message": "Table 'message' created successfully."}), 200
+
+        else:
+            return jsonify({"error": "Database connection not available"}), 500
+
+    except mysql.connector.Error as e:
+        return handle_mysql_error(e)
+
+
 @app.route('/delete-table-datawatch', methods=['GET'])
 def delete_datawatch_table():
     try:
@@ -750,6 +792,47 @@ def delete_table_parking_history():
     
     except mysql.connector.Error as e:
         return handle_mysql_error(e)
+
+
+@app.route('/delete-table-message', methods=['GET'])
+def delete_table_message():
+    try:
+        # Check if MySQL is available
+        if not is_mysql_available():
+            return jsonify({"error": "MySQL database not responding, please check the database service"}), 500
+
+        # Get a database cursor
+        cursor = get_cursor()
+
+        if cursor:
+            # Check if the 'message' table exists
+            cursor.execute("SELECT COUNT(*) FROM information_schema.tables WHERE table_name = 'message'")
+            table_exists = cursor.fetchone()[0]
+
+            if not table_exists:
+                cursor.close()
+                return jsonify({"message": "Table 'message' does not exist."}), 200
+
+            # SQL to drop the 'message' table
+            drop_table_sql = "DROP TABLE message;"
+
+            # Execute the drop table query
+            cursor.execute(drop_table_sql)
+
+            # Commit the changes to the database
+            db_connection.commit()
+
+            # Close the cursor
+            cursor.close()
+
+            return jsonify({"message": "Table 'message' deleted successfully."}), 200
+
+        else:
+            return jsonify({"error": "Database connection not available"}), 500
+
+    except mysql.connector.Error as e:
+        return handle_mysql_error(e)
+
 
 ## insert the initial records for datawatch
 @app.route('/insert-data-to-datawatch', methods=['GET'])
@@ -1168,6 +1251,76 @@ def insert_parking_history():
     except mysql.connector.Error as error:
         # Step 9: Handle MySQL errors by calling a custom error handler
         return handle_mysql_error(error)
+
+# Insert the initial records for message
+@app.route('/insert-data-to-message', methods=['GET'])
+def bulk_insert_messages():
+    try:
+        # Get a database cursor
+        cursor = get_cursor()
+
+        # Mockup message data
+        message_db = [
+            {
+                "name": "testuser",
+                "status": "unread",
+                "type": "info",
+                "group": "general",
+                "sender": "user",
+                "receiver": "admin",
+                "message": "Hi admin!"
+            },
+            {
+                "name": "superuser",
+                "status": "read",
+                "type": "alert",
+                "group": "general",
+                "sender": "admin",
+                "receiver": "user",
+                "message": "Welcome to the system!"
+            }
+            # Add more mock messages here if needed
+        ]
+
+        if cursor:
+            for msg in message_db:
+                name = msg["name"]
+                status = msg["status"]
+                type = msg["type"]
+                group = msg["group"]
+                sender = msg["sender"]
+                receiver = msg["receiver"]
+                message_text = msg["message"]
+
+                # Optional: prevent duplicates (you can adjust criteria)
+                cursor.execute("""
+                    SELECT COUNT(*) FROM message 
+                    WHERE name = %s AND sender = %s AND receiver = %s AND message = %s
+                """, (name, sender, receiver, message_text))
+                message_exists = cursor.fetchone()[0]
+
+                if message_exists:
+                    continue  # Skip existing message
+
+                # Insert new message
+                insert_sql = """
+                INSERT INTO message (name, status, type, `group`, sender, receiver, message)
+                VALUES (%s, %s, %s, %s, %s, %s, %s)
+                """
+                cursor.execute(insert_sql, (name, status, type, group, sender, receiver, message_text))
+
+            # Commit the changes
+            db_connection.commit()
+            cursor.close()
+
+            return jsonify({"message": "Mock messages inserted successfully."}), 200
+
+        else:
+            return jsonify({"error": "Database connection not available"}), 500
+
+    except mysql.connector.Error as e:
+        return handle_mysql_error(e)
+
 
 ## show the all the records of table 'datawatch'
 @app.route('/field', methods=['GET'])
@@ -4034,6 +4187,294 @@ def get_parking_history_by_name(name):
 
     except mysql.connector.Error as e:
         return handle_mysql_error(e)
+
+
+@app.route('/messages/all', methods=['GET'])
+def get_all_messages():
+    try:
+        # Check if MySQL is available
+        if not is_mysql_available():
+            return jsonify({"error": "MySQL database not responding, please check the database service"}), 500
+
+        # Get a database connection and cursor
+        connection = get_connection()
+        if connection is None:
+            return jsonify({"error": "Failed to connect to the database"}), 500
+
+        cursor = connection.cursor(dictionary=True)  # dictionary=True for JSON-style records
+
+        if cursor:
+            # SQL query to select all records from the 'message' table
+            cursor.execute("SELECT * FROM message")
+            messages = cursor.fetchall()
+
+            cursor.close()
+
+            if not messages:
+                return jsonify({"message": "No messages found."}), 200
+
+            return jsonify(messages), 200
+
+        else:
+            return jsonify({"error": "Database connection not available"}), 500
+
+    except mysql.connector.Error as e:
+        return handle_mysql_error(e)
+
+@app.route('/messages/<name>', methods=['GET'])
+def get_messages_by_name(name):
+    try:
+        # Check if MySQL is available
+        if not is_mysql_available():
+            return jsonify({"error": "MySQL database not responding, please check the database service"}), 500
+
+        # Get a database connection and cursor
+        connection = get_connection()
+        if connection is None:
+            return jsonify({"error": "Failed to connect to the database"}), 500
+
+        cursor = connection.cursor()
+
+        if cursor:
+            # Query the message table to find records by name, ordered by timestamp (latest to oldest)
+            cursor.execute("""
+                SELECT id, name, status, type, `group`, sender, receiver, message, timestamp
+                FROM message
+                WHERE name = %s
+                ORDER BY timestamp DESC
+            """, (name,))
+            message_records = cursor.fetchall()
+
+            if message_records:
+                # Format and return results
+                message_data = []
+                for record in message_records:
+                    message_data.append({
+                        "id": record[0],
+                        "name": record[1],
+                        "status": record[2],
+                        "type": record[3],
+                        "group": record[4],
+                        "sender": record[5],
+                        "receiver": record[6],
+                        "message": record[7],
+                        "timestamp": record[8]  # No formatting
+                    })
+
+                cursor.close()
+                return jsonify(message_data), 200
+            else:
+                cursor.close()
+                return jsonify({"error": f"No messages found for '{name}'."}), 404
+
+        else:
+            return jsonify({"error": "Database connection not available"}), 500
+
+    except mysql.connector.Error as e:
+        return handle_mysql_error(e)
+
+@app.route('/messages/add', methods=['POST'])
+def add_message():
+    try:
+        # Get the data from the request body
+        data = request.get_json()
+
+        # Check if MySQL is available
+        if not is_mysql_available():
+            return jsonify({"error": "MySQL database not responding, please check the database service"}), 500
+
+        # Validate the required fields
+        required_fields = ["name", "status", "type", "group", "sender", "receiver", "message"]
+        for field in required_fields:
+            if field not in data:
+                return jsonify({"error": f"'{field}' is required."}), 400
+
+        name = data["name"]
+        status = data["status"]
+        type = data["type"]
+        group = data["group"]
+        sender = data["sender"]
+        receiver = data["receiver"]
+        message_text = data["message"]
+
+        # Get a database connection and cursor
+        connection = get_connection()
+        if connection is None:
+            return jsonify({"error": "Failed to connect to the database"}), 500
+
+        cursor = connection.cursor()
+
+        if cursor:
+            # Insert the new message record into the message table
+            insert_sql = """
+            INSERT INTO message (name, status, type, `group`, sender, receiver, message)
+            VALUES (%s, %s, %s, %s, %s, %s, %s)
+            """
+            cursor.execute(insert_sql, (name, status, type, group, sender, receiver, message_text))
+
+            # Commit the changes to the database
+            db_connection.commit()
+            cursor.close()
+
+            return jsonify({"message": "Message added successfully."}), 200
+
+        else:
+            return jsonify({"error": "Database connection not available"}), 500
+
+    except mysql.connector.Error as e:
+        return handle_mysql_error(e)
+
+@app.route('/message/update', methods=['POST'])
+def update_message():
+    try:
+        # Get the data from the request body
+        data = request.get_json()
+
+        # Validate that 'name' and 'id' are provided
+        if 'name' not in data or 'id' not in data:
+            return jsonify({"error": "'name' and 'id' are required to update a message."}), 400
+
+        # Extract the fields from the data
+        name = data["name"]
+        message_id = data["id"]
+
+        # Validate other fields that can be updated (fields can be optional)
+        fields_to_update = ["status", "type", "group", "sender", "receiver", "message"]
+        for field in fields_to_update:
+            if field in data and data[field] == "":
+                return jsonify({"error": f"'{field}' cannot be empty."}), 400
+
+        # Get a database connection and cursor
+        connection = get_connection()  # Get the MySQL connection
+        if connection is None:
+            return jsonify({"error": "Failed to connect to the database"}), 500
+        
+        cursor = connection.cursor()
+
+        if cursor:
+            # Build the update SQL query
+            update_sql = """
+            UPDATE message
+            SET 
+                status = %s, 
+                type = %s, 
+                `group` = %s, 
+                sender = %s,
+                receiver = %s,
+                message = %s
+            WHERE id = %s AND name = %s
+            """
+            
+            # Prepare parameters for the query
+            params = (
+                data.get("status", ""),
+                data.get("type", ""),
+                data.get("group", ""),
+                data.get("sender", ""),
+                data.get("receiver", ""),
+                data.get("message", ""),
+                message_id,
+                name
+            )
+
+            # Execute the update query
+            cursor.execute(update_sql, params)
+
+            # Commit the changes to the database
+            db_connection.commit()
+            cursor.close()
+
+            return jsonify({"message": "Message updated successfully."}), 200
+
+        else:
+            return jsonify({"error": "Database connection not available"}), 500
+
+    except mysql.connector.Error as e:
+        return handle_mysql_error(e)
+
+@app.route('/message/delete', methods=['POST'])
+def delete_message():
+    try:
+        # Get the data from the request body
+        data = request.get_json()
+
+        # Validate that 'name' and 'id' are provided
+        if 'name' not in data or 'id' not in data:
+            return jsonify({"error": "'name' and 'id' are required to delete a message."}), 400
+
+        # Extract name and id from the data
+        name = data["name"]
+        message_id = data["id"]
+
+        # Get a database connection and cursor
+        connection = get_connection()  # Get the MySQL connection
+        if connection is None:
+            return jsonify({"error": "Failed to connect to the database"}), 500
+        
+        cursor = connection.cursor()
+
+        if cursor:
+            # SQL to delete the message record by name and id
+            delete_sql = "DELETE FROM message WHERE id = %s AND name = %s"
+
+            # Execute the delete query
+            cursor.execute(delete_sql, (message_id, name))
+
+            # Check if any rows were affected (i.e., record exists and was deleted)
+            if cursor.rowcount == 0:
+                return jsonify({"error": "Message not found for the given name and id."}), 404
+
+            # Commit the changes to the database
+            connection.commit()
+            cursor.close()
+
+            return jsonify({"message": "Message deleted successfully."}), 200
+
+        else:
+            return jsonify({"error": "Database connection not available"}), 500
+
+    except mysql.connector.Error as e:
+        return handle_mysql_error(e)
+
+@app.route('/message/delete-by-name', methods=['POST'])
+def delete_messages_by_name():
+    try:
+        # Get the data from the request body
+        data = request.get_json()
+
+        # Validate that 'name' is provided
+        if 'name' not in data:
+            return jsonify({"error": "'name' is required to delete messages."}), 400
+
+        name = data["name"]
+
+        # Get a database connection and cursor
+        connection = get_connection()  # Get the MySQL connection
+        if connection is None:
+            return jsonify({"error": "Failed to connect to the database"}), 500
+
+        cursor = connection.cursor()
+
+        if cursor:
+            # SQL to delete all messages by name
+            delete_sql = "DELETE FROM message WHERE name = %s"
+            cursor.execute(delete_sql, (name,))
+
+            if cursor.rowcount == 0:
+                return jsonify({"message": f"No messages found for name '{name}'."}), 200
+
+            # Commit the changes to the database
+            connection.commit()
+            cursor.close()
+
+            return jsonify({"message": f"All messages for '{name}' deleted successfully."}), 200
+
+        else:
+            return jsonify({"error": "Database connection not available"}), 500
+
+    except mysql.connector.Error as e:
+        return handle_mysql_error(e)
+
 
 # Route to reconnect to MySQL
 @app.route('/reconnect-mysql', methods=['GET'])

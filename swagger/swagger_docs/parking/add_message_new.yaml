@@ -1,0 +1,79 @@
+/messages/add:
+  post:
+    summary: "Add a New Message"
+    description: "Inserts a new message into the 'message' table with required fields such as 'name', 'status', 'type', 'group', 'sender', 'receiver', and 'message'."
+    tags: ["Messages"]
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: "object"
+            properties:
+              name:
+                type: "string"
+                description: "The name associated with the message."
+                example: "testuser"
+              status:
+                type: "string"
+                description: "The status of the message (e.g., 'sent', 'delivered')."
+                example: "sent"
+              type:
+                type: "string"
+                description: "The type of the message (e.g., 'text', 'image')."
+                example: "text"
+              group:
+                type: "string"
+                description: "The group the message belongs to (e.g., 'family', 'work')."
+                example: "family"
+              sender:
+                type: "string"
+                description: "The sender of the message."
+                example: "alice"
+              receiver:
+                type: "string"
+                description: "The receiver of the message."
+                example: "testuser"
+              message:
+                type: "string"
+                description: "The content of the message."
+                example: "Hey, are you free for a call?"
+            required:
+              - name
+              - status
+              - type
+              - group
+              - sender
+              - receiver
+              - message
+    responses:
+      '200':
+        description: "Message added successfully"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                message:
+                  type: "string"
+                  example: "Message added successfully."
+      '400':
+        description: "Bad Request if required fields are missing"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                error:
+                  type: "string"
+                  example: "'name', 'status', 'type', 'group', 'sender', 'receiver', and 'message' are required fields."
+      '500':
+        description: "Internal Server Error if there is an issue with the database or MySQL connection"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                error:
+                  type: "string"
+                  example: "MySQL database not responding, please check the database service"

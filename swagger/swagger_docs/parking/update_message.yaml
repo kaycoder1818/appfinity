@@ -1,0 +1,78 @@
+/message/update:
+  post:
+    summary: "Update a Message"
+    description: "Updates an existing message in the 'message' table by 'name' and 'id'. Allows updating of fields like 'status', 'type', 'group', 'sender', 'receiver', and 'message'."
+    tags: ["Messages"]
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: "object"
+            properties:
+              name:
+                type: "string"
+                description: "The name associated with the message."
+                example: "john_doe"
+              id:
+                type: "integer"
+                description: "The unique ID of the message to update."
+                example: 1
+              status:
+                type: "string"
+                description: "The updated status of the message (e.g., 'sent', 'delivered')."
+                example: "delivered"
+              type:
+                type: "string"
+                description: "The updated type of the message (e.g., 'text', 'image')."
+                example: "text"
+              group:
+                type: "string"
+                description: "The updated group of the message (e.g., 'family', 'work')."
+                example: "family"
+              sender:
+                type: "string"
+                description: "The updated sender of the message."
+                example: "alice"
+              receiver:
+                type: "string"
+                description: "The updated receiver of the message."
+                example: "john_doe"
+              message:
+                type: "string"
+                description: "The updated content of the message."
+                example: "Hey, I have an update for you!"
+            required:
+              - name
+              - id
+    responses:
+      '200':
+        description: "Message updated successfully"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                message:
+                  type: "string"
+                  example: "Message updated successfully."
+      '400':
+        description: "Bad Request if 'name' or 'id' is missing, or any field is empty"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                error:
+                  type: "string"
+                  example: "'name' and 'id' are required to update a message."
+      '500':
+        description: "Internal Server Error if there is an issue with the database or MySQL connection"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                error:
+                  type: "string"
+                  example: "MySQL database not responding, please check the database service"

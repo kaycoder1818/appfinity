@@ -1,0 +1,71 @@
+/messages/{name}:
+  get:
+    summary: "Get Messages by Name"
+    description: "Fetches all messages from the 'message' table associated with the specified name, ordered from latest to oldest."
+    tags: ["Messages"]
+    parameters:
+      - name: "name"
+        in: "path"
+        required: true
+        description: "The name to filter messages by."
+        schema:
+          type: "string"
+          example: "testuser"
+    responses:
+      '200':
+        description: "Successfully retrieved messages for the specified name"
+        content:
+          application/json:
+            schema:
+              type: "array"
+              items:
+                type: "object"
+                properties:
+                  id:
+                    type: "integer"
+                    example: 1
+                  name:
+                    type: "string"
+                    example: "testuser"
+                  status:
+                    type: "string"
+                    example: "delivered"
+                  type:
+                    type: "string"
+                    example: "text"
+                  group:
+                    type: "string"
+                    example: "family"
+                  sender:
+                    type: "string"
+                    example: "alice"
+                  receiver:
+                    type: "string"
+                    example: "testuser"
+                  message:
+                    type: "string"
+                    example: "Hey, are you free for a call?"
+                  timestamp:
+                    type: "string"
+                    format: "date-time"
+                    example: "2025-04-14T15:45:00Z"
+      '404':
+        description: "No messages found for the specified name"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                error:
+                  type: "string"
+                  example: "No messages found for 'testuser'."
+      '500':
+        description: "Internal Server Error if there is an issue with the database or MySQL connection"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                error:
+                  type: "string"
+                  example: "MySQL database not responding, please check the database service"
