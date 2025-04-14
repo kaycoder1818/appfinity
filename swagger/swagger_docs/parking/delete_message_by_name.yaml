@@ -1,21 +1,21 @@
-/message/delete-by-name:
-  post:
+/messages/delete-by-name:
+  delete:
     summary: "Delete Messages by Name"
     description: "Deletes all messages from the 'message' table associated with the specified 'name'."
     tags: ["Messages"]
-    requestBody:
-      required: true
-      content:
-        application/json:
-          schema:
-            type: "object"
-            properties:
-              name:
-                type: "string"
-                description: "The name associated with the messages to delete."
-                example: "testuser"
-            required:
-              - name
+    parameters:
+      - name: "body"
+        in: "body"
+        required: true
+        schema:
+          type: "object"
+          properties:
+            name:
+              type: "string"
+              description: "The name associated with the messages to delete."
+              example: "testuser"
+          required:
+            - name
     responses:
       '200':
         description: "Messages deleted successfully or no messages found"

@@ -1,51 +1,51 @@
 /messages/add:
   post:
     summary: "Add a New Message"
-    description: "Inserts a new message into the 'message' table with required fields such as 'name', 'status', 'type', 'group', 'sender', 'receiver', and 'message'."
+    description: "Inserts a new message into the system with the required 'name', 'status', 'type', 'group', 'sender', 'receiver', and 'message'."
     tags: ["Messages"]
-    requestBody:
-      required: true
-      content:
-        application/json:
-          schema:
-            type: "object"
-            properties:
-              name:
-                type: "string"
-                description: "The name associated with the message."
-                example: "testuser"
-              status:
-                type: "string"
-                description: "The status of the message (e.g., 'sent', 'delivered')."
-                example: "sent"
-              type:
-                type: "string"
-                description: "The type of the message (e.g., 'text', 'image')."
-                example: "text"
-              group:
-                type: "string"
-                description: "The group the message belongs to (e.g., 'family', 'work')."
-                example: "family"
-              sender:
-                type: "string"
-                description: "The sender of the message."
-                example: "alice"
-              receiver:
-                type: "string"
-                description: "The receiver of the message."
-                example: "testuser"
-              message:
-                type: "string"
-                description: "The content of the message."
-                example: "Hey, are you free for a call?"
-            required:
-              - name
-              - status
-              - type
-              - group
-              - sender
-              - receiver
-              - message
+    parameters:
+      - name: "body"
+        in: "body"
+        required: true
+        schema:
+          type: "object"
+          properties:
+            name:
+              type: "string"
+              description: "The name associated with the message."
+              example: "testuser"
+            status:
+              type: "string"
+              description: "The status of the message (e.g., 'sent', 'delivered')."
+              example: "sent"
+            type:
+              type: "string"
+              description: "The type of the message (e.g., 'text', 'image')."
+              example: "text"
+            group:
+              type: "string"
+              description: "The group the message belongs to (e.g., 'family', 'work')."
+              example: "family"
+            sender:
+              type: "string"
+              description: "The sender of the message."
+              example: "alice"
+            receiver:
+              type: "string"
+              description: "The receiver of the message."
+              example: "testuser"
+            message:
+              type: "string"
+              description: "The content of the message."
+              example: "Hey, are you free for a call?"
+          required:
+            - name
+            - status
+            - type
+            - group
+            - sender
+            - receiver
+            - message
     responses:
       '200':
         description: "Message added successfully"

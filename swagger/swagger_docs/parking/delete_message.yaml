@@ -1,26 +1,26 @@
 /message/delete:
-  post:
+  delete:
     summary: "Delete a Message"
-    description: "Deletes a message from the 'message' table by the specified 'name' and 'id'."
+    description: "Deletes a message from the system using the provided 'name' and 'id'."
     tags: ["Messages"]
-    requestBody:
-      required: true
-      content:
-        application/json:
-          schema:
-            type: "object"
-            properties:
-              name:
-                type: "string"
-                description: "The name associated with the message."
-                example: "testuser"
-              id:
-                type: "integer"
-                description: "The unique ID of the message to delete."
-                example: 1
-            required:
-              - name
-              - id
+    parameters:
+      - name: "body"
+        in: "body"
+        required: true
+        schema:
+          type: "object"
+          properties:
+            name:
+              type: "string"
+              description: "The name associated with the message."
+              example: "testuser"
+            id:
+              type: "integer"
+              description: "The unique ID of the message to delete."
+              example: 1
+          required:
+            - name
+            - id
     responses:
       '200':
         description: "Message deleted successfully"
@@ -43,7 +43,7 @@
                   type: "string"
                   example: "'name' and 'id' are required to delete a message."
       '404':
-        description: "Message not found if no message matches the given 'name' and 'id'"
+        description: "Message not found for given 'name' and 'id'"
         content:
           application/json:
             schema:
@@ -53,7 +53,7 @@
                   type: "string"
                   example: "Message not found for the given name and id."
       '500':
-        description: "Internal Server Error if there is an issue with the database or MySQL connection"
+        description: "Internal Server Error if database or MySQL connection fails"
         content:
           application/json:
             schema:

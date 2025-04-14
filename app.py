@@ -4324,7 +4324,7 @@ def add_message():
     except mysql.connector.Error as e:
         return handle_mysql_error(e)
 
-@app.route('/message/update', methods=['POST'])
+@app.route('/message/update', methods=['PUT'])
 def update_message():
     try:
         # Get the data from the request body
@@ -4392,7 +4392,7 @@ def update_message():
     except mysql.connector.Error as e:
         return handle_mysql_error(e)
 
-@app.route('/message/delete', methods=['POST'])
+@app.route('/message/delete', methods=['DELETE'])
 def delete_message():
     try:
         # Get the data from the request body
@@ -4436,7 +4436,7 @@ def delete_message():
     except mysql.connector.Error as e:
         return handle_mysql_error(e)
 
-@app.route('/message/delete-by-name', methods=['POST'])
+@app.route('/message/delete-by-name', methods=['DELETE'])
 def delete_messages_by_name():
     try:
         # Get the data from the request body
