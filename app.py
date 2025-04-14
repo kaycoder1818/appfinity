@@ -2855,6 +2855,61 @@ def delete_store_column():
     except mysql.connector.Error as e:
         return handle_mysql_error(e)
 
+# ## adding the new profile
+# @app.route('/profile/add', methods=['POST'])
+# def insert_profile():
+#     try:
+#         # Get the data from the request body
+#         data = request.get_json()
+
+#         # Validate the required fields
+#         required_fields = ["name", "full_name", "id_number", "plate_number", "vehicle_type", "vehicle_model"]
+#         for field in required_fields:
+#             if field not in data:
+#                 return jsonify({"error": f"'{field}' is required."}), 400
+
+#         name = data["name"]
+#         full_name = data["full_name"]
+
+#         # Check if the 'profile' table exists
+#         # cursor = get_cursor()
+
+#         # Get a database connection and cursor
+#         connection = get_connection()  # Get the MySQL connection
+#         if connection is None:
+#             return jsonify({"error": "Failed to connect to the database"}), 500
+        
+#         cursor = connection.cursor()
+
+
+#         if cursor:
+#             # Check if the given 'name' or 'full_name' already exists in the profile table
+#             cursor.execute("SELECT COUNT(*) FROM profile WHERE name = %s OR full_name = %s", (name, full_name))
+#             duplicate_check = cursor.fetchone()[0]
+
+#             if duplicate_check:
+#                 cursor.close()
+#                 return jsonify({"error": "Profile with this 'name' or 'full_name' already exists."}), 400
+
+#             # Insert the new record into the profile table
+#             insert_sql = """
+#             INSERT INTO profile (name, full_name, id_number, plate_number, vehicle_type, vehicle_model)
+#             VALUES (%s, %s, %s, %s, %s, %s)
+#             """
+#             cursor.execute(insert_sql, (name, full_name, data["id_number"], data["plate_number"], data["vehicle_type"], data["vehicle_model"]))
+
+#             # Commit the changes to the database
+#             db_connection.commit()
+#             cursor.close()
+
+#             return jsonify({"message": "Profile added successfully."}), 200
+
+#         else:
+#             return jsonify({"error": "Database connection not available"}), 500
+
+#     except mysql.connector.Error as e:
+#         return handle_mysql_error(e)
+
 ## adding the new profile
 @app.route('/profile/add', methods=['POST'])
 def insert_profile():
@@ -2870,17 +2925,18 @@ def insert_profile():
 
         name = data["name"]
         full_name = data["full_name"]
-
-        # Check if the 'profile' table exists
-        # cursor = get_cursor()
+        id_number = data["id_number"]
+        plate_number = data["plate_number"]
+        vehicle_type = data["vehicle_type"]
+        vehicle_model = data["vehicle_model"]
+        image_link = data.get("image_link", None)  # Optional field
 
         # Get a database connection and cursor
-        connection = get_connection()  # Get the MySQL connection
+        connection = get_connection()
         if connection is None:
             return jsonify({"error": "Failed to connect to the database"}), 500
         
         cursor = connection.cursor()
-
 
         if cursor:
             # Check if the given 'name' or 'full_name' already exists in the profile table
@@ -2893,10 +2949,12 @@ def insert_profile():
 
             # Insert the new record into the profile table
             insert_sql = """
-            INSERT INTO profile (name, full_name, id_number, plate_number, vehicle_type, vehicle_model)
-            VALUES (%s, %s, %s, %s, %s, %s)
+            INSERT INTO profile (name, full_name, id_number, plate_number, vehicle_type, vehicle_model, image_link)
+            VALUES (%s, %s, %s, %s, %s, %s, %s)
             """
-            cursor.execute(insert_sql, (name, full_name, data["id_number"], data["plate_number"], data["vehicle_type"], data["vehicle_model"]))
+            cursor.execute(insert_sql, (
+                name, full_name, id_number, plate_number, vehicle_type, vehicle_model, image_link
+            ))
 
             # Commit the changes to the database
             db_connection.commit()
@@ -2909,6 +2967,7 @@ def insert_profile():
 
     except mysql.connector.Error as e:
         return handle_mysql_error(e)
+
 
 ## updating records from profile
 @app.route('/profile/update', methods=['POST'])
