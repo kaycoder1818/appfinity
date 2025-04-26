@@ -8,9 +8,16 @@ import datetime
 import random
 import string
 
+from flask_cors import CORS
 
-app = Flask(__name__)
+# app = Flask(__name__)
 app = Flask(__name__, template_folder='templates', static_folder='static', static_url_path='/static')
+
+CORS(app, resources={r"/*": {"origins": "*"}})  # Enable CORS for all routes and all origins
+
+# Optional: Restrict CORS to specific domains
+# If you want to allow only your front-end domain instead of "*", you can specify it:
+# CORS(app, resources={r"/*": {"origins": ["https://web-lyart-one-16.vercel.app"]}})
 
 # Set up Swagger
 setup_swagger(app)
