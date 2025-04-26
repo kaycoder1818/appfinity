@@ -4196,6 +4196,131 @@ def get_parking_history_by_name(name):
         return handle_mysql_error(e)
 
 
+@app.route('/parking-history/delete-all', methods=['DELETE'])
+def delete_all_parking_history():
+    try:
+        # Check if MySQL is available
+        if not is_mysql_available():
+            return jsonify({"error": "MySQL database not responding, please check the database service"}), 500
+
+        # Get a database connection and cursor
+        connection = get_connection()
+        if connection is None:
+            return jsonify({"error": "Failed to connect to the database"}), 500
+
+        cursor = connection.cursor()
+
+        if cursor:
+            # Execute delete query
+            cursor.execute("DELETE FROM parking_history")
+            db_connection.commit()
+            cursor.close()
+
+            return jsonify({"message": "All parking history records deleted successfully."}), 200
+
+        else:
+            return jsonify({"error": "Database connection not available"}), 500
+
+    except mysql.connector.Error as e:
+        return handle_mysql_error(e)
+
+@app.route('/parking-history/delete/<name>', methods=['DELETE'])
+def delete_parking_history_by_name(name):
+    try:
+        # Check if MySQL is available
+        if not is_mysql_available():
+            return jsonify({"error": "MySQL database not responding, please check the database service"}), 500
+
+        # Get a database connection and cursor
+        connection = get_connection()
+        if connection is None:
+            return jsonify({"error": "Failed to connect to the database"}), 500
+
+        cursor = connection.cursor()
+
+        if cursor:
+            # Delete all records with the specified name
+            cursor.execute("DELETE FROM parking_history WHERE name = %s", (name,))
+            db_connection.commit()
+            affected_rows = cursor.rowcount
+            cursor.close()
+
+            if affected_rows > 0:
+                return jsonify({"message": f"All records for '{name}' deleted successfully."}), 200
+            else:
+                return jsonify({"message": f"No records found for '{name}'."}), 404
+
+        else:
+            return jsonify({"error": "Database connection not available"}), 500
+
+    except mysql.connector.Error as e:
+        return handle_mysql_error(e)
+
+@app.route('/parking-history/delete/<int:id>', methods=['DELETE'])
+def delete_parking_history_by_id(id):
+    try:
+        # Check if MySQL is available
+        if not is_mysql_available():
+            return jsonify({"error": "MySQL database not responding, please check the database service"}), 500
+
+        # Get a database connection and cursor
+        connection = get_connection()
+        if connection is None:
+            return jsonify({"error": "Failed to connect to the database"}), 500
+
+        cursor = connection.cursor()
+
+        if cursor:
+            # Delete the record with the specified id
+            cursor.execute("DELETE FROM parking_history WHERE id = %s", (id,))
+            db_connection.commit()
+            affected_rows = cursor.rowcount
+            cursor.close()
+
+            if affected_rows > 0:
+                return jsonify({"message": f"Record with id {id} deleted successfully."}), 200
+            else:
+                return jsonify({"message": f"No record found with id {id}."}), 404
+
+        else:
+            return jsonify({"error": "Database connection not available"}), 500
+
+    except mysql.connector.Error as e:
+        return handle_mysql_error(e)
+
+@app.route('/parking-history/delete/status/<status>', methods=['DELETE'])
+def delete_parking_history_by_status(status):
+    try:
+        # Check if MySQL is available
+        if not is_mysql_available():
+            return jsonify({"error": "MySQL database not responding, please check the database service"}), 500
+
+        # Get a database connection and cursor
+        connection = get_connection()
+        if connection is None:
+            return jsonify({"error": "Failed to connect to the database"}), 500
+
+        cursor = connection.cursor()
+
+        if cursor:
+            # Delete records matching the given status
+            cursor.execute("DELETE FROM parking_history WHERE status = %s", (status,))
+            db_connection.commit()
+            affected_rows = cursor.rowcount
+            cursor.close()
+
+            if affected_rows > 0:
+                return jsonify({"message": f"All records with status '{status}' deleted successfully."}), 200
+            else:
+                return jsonify({"message": f"No records found with status '{status}'."}), 404
+
+        else:
+            return jsonify({"error": "Database connection not available"}), 500
+
+    except mysql.connector.Error as e:
+        return handle_mysql_error(e)
+
+
 @app.route('/messages/all', methods=['GET'])
 def get_all_messages():
     try:
