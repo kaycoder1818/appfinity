@@ -4256,7 +4256,7 @@ def delete_parking_history_by_name(name):
     except mysql.connector.Error as e:
         return handle_mysql_error(e)
 
-@app.route('/parking-history/delete/<int:id>', methods=['DELETE'])
+@app.route('/parking-history/delete/id/<int:id>', methods=['DELETE'])
 def delete_parking_history_by_id(id):
     try:
         # Check if MySQL is available

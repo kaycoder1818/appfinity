@@ -1,4 +1,4 @@
-/parking-history/delete/{id}:
+/parking-history/delete/id/{id}:
   delete:
     summary: "Delete Parking History Record by ID"
     description: "Deletes a specific parking history record based on the provided ID. Returns a message indicating whether the record was deleted or not found."
