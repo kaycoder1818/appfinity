@@ -1,0 +1,49 @@
+/violations/exclude-resolved:
+  get:
+    summary: "Get Violations Excluding Resolved"
+    description: "Fetches all violations excluding those with the status 'resolved'."
+    tags: ["Violations"]
+    responses:
+      '200':
+        description: "Successfully retrieved unresolved violations"
+        content:
+          application/json:
+            schema:
+              type: "array"
+              items:
+                type: "object"
+                properties:
+                  id:
+                    type: "integer"
+                    description: "ID of the violation"
+                    example: 1
+                  name:
+                    type: "string"
+                    description: "Name associated with the violation"
+                    example: "testuser"
+                  role:
+                    type: "string"
+                    description: "Role of the person associated with the violation"
+                    example: "admin"
+                  status:
+                    type: "string"
+                    description: "Status of the violation"
+                    example: "pending"
+                  type:
+                    type: "string"
+                    description: "Type of violation"
+                    example: "speeding"
+                  info:
+                    type: "string"
+                    description: "Additional information about the violation"
+                    example: "Violation details here"
+      '500':
+        description: "Internal Server Error if there is an issue with the database or MySQL connection"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                error:
+                  type: "string"
+                  example: "MySQL database not responding, please check the database service"

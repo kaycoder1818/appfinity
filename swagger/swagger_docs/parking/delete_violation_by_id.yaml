@@ -1,19 +1,19 @@
-/parking-history/delete/id/{id}:
+/violations/delete/{violation_id}:
   delete:
-    summary: "Delete Parking History Record by ID"
-    description: "Deletes a specific parking history record based on the provided ID. Returns a message indicating whether the record was deleted or not found."
-    tags: ["Parking History"]
+    summary: "Delete Violation by ID"
+    description: "Deletes a violation record from the database using the provided violation ID."
+    tags: ["Violations"]
     parameters:
-      - name: "id"
+      - name: "violation_id"
         in: "path"
         required: true
-        description: "The ID of the parking history record to be deleted"
+        description: "ID of the violation to be deleted"
         schema:
           type: "integer"
-        example: 1
+          example: 123
     responses:
       '200':
-        description: "Record with the specified ID deleted successfully"
+        description: "Violation successfully deleted"
         content:
           application/json:
             schema:
@@ -21,9 +21,9 @@
               properties:
                 message:
                   type: "string"
-                  example: "Record with id 1 deleted successfully."
+                  example: "Violation with ID 123 deleted successfully."
       '404':
-        description: "No record found with the specified ID"
+        description: "Violation not found"
         content:
           application/json:
             schema:
@@ -31,9 +31,9 @@
               properties:
                 message:
                   type: "string"
-                  example: "No record found with id 1."
+                  example: "No violation found with ID 123."
       '500':
-        description: "Internal Server Error due to database issues"
+        description: "Internal Server Error"
         content:
           application/json:
             schema:

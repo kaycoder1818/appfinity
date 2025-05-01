@@ -3690,6 +3690,313 @@ def get_violations_by_name(name):
     except mysql.connector.Error as e:
         return handle_mysql_error(e)
 
+@app.route('/violations/delete/<int:violation_id>', methods=['DELETE'])
+def delete_violation_by_id(violation_id):
+    try:
+        # Check if MySQL is available
+        if not is_mysql_available():
+            return jsonify({"error": "MySQL database not responding, please check the database service"}), 500
+
+        # Get a database connection and cursor
+        connection = get_connection()
+        if connection is None:
+            return jsonify({"error": "Failed to connect to the database"}), 500
+
+        cursor = connection.cursor()
+
+        if cursor:
+            # Delete the violation with the specified ID
+            delete_sql = "DELETE FROM violations WHERE id = %s"
+            cursor.execute(delete_sql, (violation_id,))
+
+            # Commit the changes
+            connection.commit()
+
+            rows_affected = cursor.rowcount
+            cursor.close()
+
+            if rows_affected > 0:
+                return jsonify({"message": f"Violation with ID {violation_id} deleted successfully."}), 200
+            else:
+                return jsonify({"message": f"No violation found with ID {violation_id}."}), 404
+
+        else:
+            return jsonify({"error": "Database connection not available"}), 500
+
+    except mysql.connector.Error as e:
+        return handle_mysql_error(e)
+
+
+@app.route('/violations/update-status/<int:violation_id>', methods=['PUT'])
+def update_violation_status(violation_id):
+    try:
+        # Parse the request data
+        data = request.get_json()
+        new_status = data.get("status")
+
+        # Validate the input
+        if not new_status:
+            return jsonify({"error": "'status' field is required."}), 400
+
+        # Check if MySQL is available
+        if not is_mysql_available():
+            return jsonify({"error": "MySQL database not responding, please check the database service"}), 500
+
+        # Get a database connection and cursor
+        connection = get_connection()
+        if connection is None:
+            return jsonify({"error": "Failed to connect to the database"}), 500
+
+        cursor = connection.cursor()
+
+        if cursor:
+            # Update the status for the given ID
+            update_sql = "UPDATE violations SET status = %s WHERE id = %s"
+            cursor.execute(update_sql, (new_status, violation_id))
+
+            connection.commit()
+            rows_affected = cursor.rowcount
+            cursor.close()
+
+            if rows_affected > 0:
+                return jsonify({"message": f"Status for violation ID {violation_id} updated to '{new_status}'."}), 200
+            else:
+                return jsonify({"message": f"No violation found with ID {violation_id}."}), 404
+
+        else:
+            return jsonify({"error": "Database connection not available"}), 500
+
+    except mysql.connector.Error as e:
+        return handle_mysql_error(e)
+
+
+@app.route('/violations/rfid/add', methods=['POST'])
+def add_violation_and_update_rfid():
+    try:
+        # Get the data from the request body
+        data = request.get_json()
+
+        # Check if MySQL is available
+        if not is_mysql_available():
+            return jsonify({"error": "MySQL database not responding, please check the database service"}), 500
+
+        # Validate required fields
+        required_fields = ["name", "role", "status", "type", "info"]
+        for field in required_fields:
+            if field not in data:
+                return jsonify({"error": f"'{field}' is required to add a violation."}), 400
+
+        name = data["name"]
+        role = data["role"]
+        status = data["status"]
+        violation_type = data["type"]
+        info = data["info"]
+
+        # Get DB connection and cursor
+        connection = get_connection()
+        if connection is None:
+            return jsonify({"error": "Failed to connect to the database"}), 500
+
+        cursor = connection.cursor()
+
+        if cursor:
+            # Check if the violation name already exists
+            cursor.execute("SELECT COUNT(*) FROM violations WHERE name = %s", (name,))
+            name_exists = cursor.fetchone()[0]
+
+            if name_exists:
+                return jsonify({"error": "Violation with this name already exists."}), 400
+
+            # Insert new violation
+            insert_sql = """
+            INSERT INTO violations (name, role, status, type, info)
+            VALUES (%s, %s, %s, %s, %s);
+            """
+            cursor.execute(insert_sql, (name, role, status, violation_type, info))
+
+            # Check for matching user by name
+            cursor.execute("SELECT rfid FROM users WHERE name = %s", (name,))
+            user = cursor.fetchone()
+
+            if user:
+                current_rfid = user[0] or ""
+                updated_rfid = f"{current_rfid}-violate"
+
+                # Update the user's RFID value
+                update_sql = "UPDATE users SET rfid = %s WHERE name = %s"
+                cursor.execute(update_sql, (updated_rfid, name))
+
+            # Commit changes and close cursor
+            connection.commit()
+            cursor.close()
+
+            return jsonify({"message": "Violation added and RFID updated (if user found)."}), 200
+
+        else:
+            return jsonify({"error": "Database connection not available"}), 500
+
+    except mysql.connector.Error as e:
+        return handle_mysql_error(e)
+
+
+@app.route('/violations/rfid/resolve/byid', methods=['PUT'])
+def resolve_violation_and_update_rfid_by_id():
+    try:
+        # Get the data from the request body
+        data = request.get_json()
+
+        # Check if MySQL is available
+        if not is_mysql_available():
+            return jsonify({"error": "MySQL database not responding, please check the database service"}), 500
+
+        # Validate that 'id' field is provided
+        if "id" not in data:
+            return jsonify({"error": "'id' field is required."}), 400
+        
+        violation_id = data["id"]
+
+        # Get DB connection and cursor
+        connection = get_connection()
+        if connection is None:
+            return jsonify({"error": "Failed to connect to the database"}), 500
+
+        cursor = connection.cursor()
+
+        if cursor:
+            # Update the violation status to "resolved"
+            update_sql = "UPDATE violations SET status = 'resolved' WHERE id = %s"
+            cursor.execute(update_sql, (violation_id,))
+
+            # Get the name from the updated violation record
+            cursor.execute("SELECT name FROM violations WHERE id = %s", (violation_id,))
+            violation = cursor.fetchone()
+
+            if violation:
+                name = violation[0]
+
+                # Check if user exists in the 'users' table
+                cursor.execute("SELECT rfid FROM users WHERE name = %s", (name,))
+                user = cursor.fetchone()
+
+                if user:
+                    current_rfid = user[0] or ""
+                    # Remove the '-violate' suffix if it exists
+                    if current_rfid.endswith("-violate"):
+                        updated_rfid = current_rfid[:-8]  # Remove the '-violate' suffix
+                        
+                        # Update the user's RFID value
+                        update_rfid_sql = "UPDATE users SET rfid = %s WHERE name = %s"
+                        cursor.execute(update_rfid_sql, (updated_rfid, name))
+
+            # Commit changes and close cursor
+            connection.commit()
+            cursor.close()
+
+            return jsonify({"message": f"Violation with ID {violation_id} resolved and RFID updated (if user found)."}), 200
+
+        else:
+            return jsonify({"error": "Database connection not available"}), 500
+
+    except mysql.connector.Error as e:
+        return handle_mysql_error(e)
+
+@app.route('/violations/rfid/resolve/byname', methods=['PUT'])
+def resolve_violation_and_update_rfid_by_name():
+    try:
+        # Get the data from the request body
+        data = request.get_json()
+
+        # Check if MySQL is available
+        if not is_mysql_available():
+            return jsonify({"error": "MySQL database not responding, please check the database service"}), 500
+
+        # Validate that 'name' field is provided
+        if "name" not in data:
+            return jsonify({"error": "'name' field is required."}), 400
+        
+        violation_name = data["name"]
+
+        # Get DB connection and cursor
+        connection = get_connection()
+        if connection is None:
+            return jsonify({"error": "Failed to connect to the database"}), 500
+
+        cursor = connection.cursor()
+
+        if cursor:
+            # Update the violation status to "resolved" by name
+            update_sql = "UPDATE violations SET status = 'resolved' WHERE name = %s"
+            cursor.execute(update_sql, (violation_name,))
+
+            # Get the name from the updated violation record
+            cursor.execute("SELECT name FROM violations WHERE name = %s", (violation_name,))
+            violation = cursor.fetchone()
+
+            if violation:
+                name = violation[0]
+
+                # Check if user exists in the 'users' table
+                cursor.execute("SELECT rfid FROM users WHERE name = %s", (name,))
+                user = cursor.fetchone()
+
+                if user:
+                    current_rfid = user[0] or ""
+                    # Remove the '-violate' suffix if it exists
+                    if current_rfid.endswith("-violate"):
+                        updated_rfid = current_rfid[:-8]  # Remove the '-violate' suffix
+                        
+                        # Update the user's RFID value
+                        update_rfid_sql = "UPDATE users SET rfid = %s WHERE name = %s"
+                        cursor.execute(update_rfid_sql, (updated_rfid, name))
+
+            # Commit changes and close cursor
+            connection.commit()
+            cursor.close()
+
+            return jsonify({"message": f"Violation with name '{violation_name}' resolved and RFID updated (if user found)."}), 200
+
+        else:
+            return jsonify({"error": "Database connection not available"}), 500
+
+    except mysql.connector.Error as e:
+        return handle_mysql_error(e)
+
+@app.route('/violations/exclude-resolved', methods=['GET'])
+def get_violations_excluding_resolved():
+    try:
+        # Check if MySQL is available
+        if not is_mysql_available():
+            return jsonify({"error": "MySQL database not responding, please check the database service"}), 500
+
+        # Get a database connection and cursor
+        connection = get_connection()  # Get the MySQL connection
+        if connection is None:
+            return jsonify({"error": "Failed to connect to the database"}), 500
+        
+        cursor = connection.cursor()
+
+        if cursor:
+            # SQL query to get all violations excluding those with status 'resolved'
+            cursor.execute("SELECT * FROM violations WHERE status != 'resolved'")
+            violations = cursor.fetchall()
+
+            # Close the cursor
+            cursor.close()
+
+            # If no violations found, return an empty list
+            if not violations:
+                return jsonify({"message": "No unresolved violations found."}), 200
+
+            # Return the result as JSON
+            return jsonify(violations), 200
+
+        else:
+            return jsonify({"error": "Database connection not available"}), 500
+
+    except mysql.connector.Error as e:
+        return handle_mysql_error(e)
+
+
 @app.route('/notifications', methods=['GET'])
 def get_notifications():
     try:

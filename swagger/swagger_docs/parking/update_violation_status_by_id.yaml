@@ -1,0 +1,67 @@
+/violations/update-status/{violation_id}:
+  put:
+    summary: "Update Violation Status"
+    description: "Updates the status of a violation with the specified ID."
+    tags: ["Violations"]
+    parameters:
+      - name: "violation_id"
+        in: "path"
+        required: true
+        description: "ID of the violation to update"
+        schema:
+          type: "integer"
+          example: 123
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: "object"
+            properties:
+              status:
+                type: "string"
+                description: "New status for the violation"
+                example: "resolved"
+            required:
+              - status
+    responses:
+      '200':
+        description: "Violation status successfully updated"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                message:
+                  type: "string"
+                  example: "Status for violation ID 123 updated to 'resolved'."
+      '400':
+        description: "Bad Request due to missing or invalid fields"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                error:
+                  type: "string"
+                  example: "'status' field is required."
+      '404':
+        description: "Violation not found"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                message:
+                  type: "string"
+                  example: "No violation found with ID 123."
+      '500':
+        description: "Internal Server Error"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                error:
+                  type: "string"
+                  example: "MySQL database not responding, please check the database service"

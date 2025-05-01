@@ -1,8 +1,8 @@
-/messages/delete-by-name:
-  delete:
-    summary: "Delete Messages by Name"
-    description: "Deletes all messages from the 'message' table associated with the specified 'name'."
-    tags: ["Messages"]
+/violations/rfid/resolve/byname:
+  put:
+    summary: "Resolve Violation and Update RFID by Name"
+    description: "Resolves a violation by updating its status to 'resolved' and updates the RFID of the associated user (if found), based on the violation name."
+    tags: ["Violations"]
     parameters:
       - name: "body"
         in: "body"
@@ -12,13 +12,13 @@
           properties:
             name:
               type: "string"
-              description: "The name associated with the messages to delete."
+              description: "The name associated with the violation to resolve"
               example: "testuser"
           required:
             - name
     responses:
       '200':
-        description: "Messages deleted successfully or no messages found"
+        description: "Violation successfully resolved and RFID updated (if user found)"
         content:
           application/json:
             schema:
@@ -26,9 +26,9 @@
               properties:
                 message:
                   type: "string"
-                  example: "All messages for 'testuser' deleted successfully."
+                  example: "Violation with name 'testuser' resolved and RFID updated (if user found)."
       '400':
-        description: "Bad Request if 'name' is not provided"
+        description: "Bad Request if the 'name' field is missing"
         content:
           application/json:
             schema:
@@ -36,7 +36,7 @@
               properties:
                 error:
                   type: "string"
-                  example: "'name' is required to delete messages."
+                  example: "'name' field is required."
       '500':
         description: "Internal Server Error if there is an issue with the database or MySQL connection"
         content:

@@ -1,0 +1,69 @@
+/violations/rfid/add:
+  post:
+    summary: "Add Violation and Update RFID"
+    description: "Adds a new violation to the 'violations' table and updates the RFID of the associated user, if the user is found in the 'users' table."
+    tags: ["Violations"]
+    parameters:
+      - name: "body"
+        in: "body"
+        required: true
+        schema:
+          type: "object"
+          properties:
+            name:
+              type: "string"
+              description: "The name of the person or entity associated with the violation."
+              example: "testuser"
+            role:
+              type: "string"
+              description: "The role of the person or entity associated with the violation."
+              example: "admin"
+            status:
+              type: "string"
+              description: "The status of the violation."
+              example: "pending"
+            type:
+              type: "string"
+              description: "The type of violation."
+              example: "speeding"
+            info:
+              type: "string"
+              description: "Additional information about the violation."
+              example: "Violation details here"
+          required:
+            - name
+            - role
+            - status
+            - type
+            - info
+    responses:
+      '200':
+        description: "Violation successfully added and RFID updated (if user found)"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                message:
+                  type: "string"
+                  example: "Violation added and RFID updated (if user found)."
+      '400':
+        description: "Bad Request if required fields are missing or violation already exists"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                error:
+                  type: "string"
+                  example: "'name' is required to add a violation."
+      '500':
+        description: "Internal Server Error if there is an issue with the database or MySQL connection"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                error:
+                  type: "string"
+                  example: "MySQL database not responding, please check the database service"
